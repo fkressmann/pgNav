@@ -9,6 +9,8 @@ import { TableViewCardsComponent } from './table-view-cards/table-view-cards.com
 import { TableViewComponent } from './table-view/table-view.component';
 import { TableDetailsComponent } from './table-details/table-details.component';
 import { AppRoutingModule } from './app-routing.module';
+import { TableDetailsAddDialogComponent } from './table-details-add-dialog/table-details-add-dialog.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -16,13 +18,15 @@ import { AppRoutingModule } from './app-routing.module';
     TableViewListComponent,
     TableViewCardsComponent,
     TableViewComponent,
-    TableDetailsComponent
+    TableDetailsComponent,
+    TableDetailsAddDialogComponent
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     AngularMaterialModule, // collects all required angular material modules
-    AppRoutingModule
+    AppRoutingModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
