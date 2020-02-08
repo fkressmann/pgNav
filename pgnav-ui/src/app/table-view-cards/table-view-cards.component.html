@@ -1,6 +1,8 @@
-<mat-card *ngFor="let person of persons$ | async" class="table-card">
-  <mat-card-header>
-    <mat-card-title>{{ person.firstname }}</mat-card-title>
-    <mat-card-subtitle>{{ person.lastname }}</mat-card-subtitle>
-  </mat-card-header>
-</mat-card>
+<div class="cards-wrapper">
+  <mat-card *ngFor="let person of persons$ | async" class="table-card mx-2 my-2">
+    <mat-card-header>
+      <mat-card-title>{{ person.firstname }}</mat-card-title>
+      <mat-card-subtitle>{{ person.lastname }}</mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+</div>
