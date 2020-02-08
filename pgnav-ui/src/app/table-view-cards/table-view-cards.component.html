@@ -1,5 +1,11 @@
 <div class="cards-wrapper">
-  <mat-card *ngFor="let person of persons$ | async" class="table-card mx-2 my-2">
+  <mat-card
+    *ngFor="let person of persons$ | async"
+    class="table-card mx-2 my-2"
+    [routerLink]="'/person'"
+    [matTooltip] ="'See details of ' + person.firstname"
+    [matTooltipPosition]="'below'"
+    aria-label="Button that displays a tooltip in various positions">
     <mat-card-header>
       <mat-card-title>{{ person.firstname }}</mat-card-title>
       <mat-card-subtitle>{{ person.lastname }}</mat-card-subtitle>
