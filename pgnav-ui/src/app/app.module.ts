@@ -5,11 +5,15 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { TableViewListComponent } from './table-view-list/table-view-list.component';
+import { TableViewCardsComponent } from './table-view-cards/table-view-cards.component';
+import { TableViewComponent } from './table-view/table-view.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    TableViewListComponent
+    TableViewListComponent,
+    TableViewCardsComponent,
+    TableViewComponent
   ],
   imports: [
     BrowserModule,

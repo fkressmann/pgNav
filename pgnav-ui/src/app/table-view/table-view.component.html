@@ -1,0 +1,4 @@
+<mat-slide-toggle #slider>Card View</mat-slide-toggle>
+
+<pgnav-ui-table-view-list *ngIf="!slider.checked"></pgnav-ui-table-view-list>
+<pgnav-ui-table-view-cards *ngIf="slider.checked"></pgnav-ui-table-view-cards>

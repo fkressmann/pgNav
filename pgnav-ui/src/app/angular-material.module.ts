@@ -1,8 +1,14 @@
-import { MatTableModule } from '@angular/material/table';
 import { NgModule } from '@angular/core';
 
+import { MatTableModule } from '@angular/material/table';
+import { MatCardModule } from '@angular/material/card';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+
+
 const modules = [
-  MatTableModule
+  MatTableModule,
+  MatCardModule,
+  MatSlideToggleModule
 ];
 
 @NgModule({
