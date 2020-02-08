@@ -7,7 +7,7 @@
   <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
   <tr mat-row
       *matRowDef="let table; columns: columnsToDisplay"
-      [routerLink]="'table.name'"
+      [routerLink]="table.name"
       class="table-row"
       [matTooltip] ="'See details of ' + table.name"
       [matTooltipPosition]="'below'"

@@ -16,7 +16,7 @@ export class TableViewComponent implements OnInit {
 
   ngOnInit(): void {
     this.tableDefinitions = this.tableService.mockTableDefinitions();
-    this.tableData$ = this.tableService.mockTableData();
+    this.tableData$ = this.tableService.mockTables();
   }
 
 }
