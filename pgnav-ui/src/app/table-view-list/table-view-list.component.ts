@@ -1,36 +1,24 @@
-import { TableService } from './../core/table.service';
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Person } from '../core/person.model';
-
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'pgnav-ui-table-view-list',
   templateUrl: './table-view-list.component.html',
-  styleUrls: ['./table-view-list.component.css']
+  styleUrls: ['./table-view-list.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TableViewListComponent implements OnInit, OnDestroy {
+export class TableViewListComponent implements OnInit {
 
-  constructor(private tableService: TableService) { }
+  constructor() { }
 
-  destroy$: Subject<boolean> = new Subject();
+  @Input() data: any[];
+  @Input() definitions: string[];
 
-  data: Person[];
   columnsToDisplay: string[];
   displayedColumns: string[];
 
   ngOnInit(): void {
-    this.columnsToDisplay = this.tableService.personsColumns();
-    this.displayedColumns = this.columnsToDisplay.slice(); // create a copy
-    this.tableService.mockPersonTable().pipe(
-      takeUntil(this.destroy$),
-    ).subscribe( (persons: Person[]) => this.data = persons);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next(true);
-    this.destroy$.unsubscribe();
+    this.columnsToDisplay = this.definitions.slice();
+    this.displayedColumns = this.definitions.slice();
   }
 
 }

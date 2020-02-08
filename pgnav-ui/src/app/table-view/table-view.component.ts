@@ -1,4 +1,6 @@
+import { TableService } from './../core/table.service';
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'pgnav-ui-table-view',
@@ -7,9 +9,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class TableViewComponent implements OnInit {
 
-  constructor() { }
+  tableData$: Observable<any>;
+  tableDefinitions: string[];
+
+  constructor(private tableService: TableService) { }
 
   ngOnInit(): void {
+    this.tableDefinitions = this.tableService.mockTableDefinitions();
+    this.tableData$ = this.tableService.mockTableData();
   }
 
 }
