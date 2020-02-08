@@ -6,10 +6,10 @@
 
   <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
   <tr mat-row
-      *matRowDef="let row; columns: columnsToDisplay"
-      [routerLink]="'/person'"
+      *matRowDef="let table; columns: columnsToDisplay"
+      [routerLink]="'table.name'"
       class="table-row"
-      [matTooltip] ="'See details of ' + row.firstname"
+      [matTooltip] ="'See details of ' + table.name"
       [matTooltipPosition]="'below'"
       aria-label="Button that displays a tooltip in various positions"></tr>
 </table>

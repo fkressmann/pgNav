@@ -1,21 +1,21 @@
 import { TableService } from './../core/table.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Person } from '../core/person.model';
 
 @Component({
   selector: 'pgnav-ui-table-view-cards',
   templateUrl: './table-view-cards.component.html',
-  styleUrls: ['./table-view-cards.component.css']
+  styleUrls: ['./table-view-cards.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableViewCardsComponent implements OnInit {
 
-  persons$: Observable<Person[]>;
+  @Input() data: any[];
 
-  constructor(private tableService: TableService) { }
+  constructor() { }
 
   ngOnInit(): void {
-    this.persons$ = this.tableService.mockPersonTable();
   }
 
 }
