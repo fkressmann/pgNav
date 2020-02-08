@@ -12,13 +12,13 @@
     "directive-selector": [
       true,
       "attribute",
-      "app",
+      "pgnav-ui",
       "camelCase"
     ],
     "component-selector": [
       true,
       "element",
-      "app",
+      "pgnav-ui",
       "kebab-case"
     ],
     "import-blacklist": [
