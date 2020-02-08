@@ -1,1 +1,19 @@
-<p>table-details works!</p>
+<h3>{{ tableName | titlecase }} table</h3>
+<button
+  mat-button
+  routerLink="/"
+  [matTooltip] ="'Go back to overvied page'"
+  [matTooltipPosition]="'below'"
+  aria-label="Button that displays a tooltip in various positions">Back to overview</button>
+
+<table mat-table [dataSource]="data" class="mat-elevation-z8">
+  <ng-container [matColumnDef]="column" *ngFor="let column of displayedColumns">
+    <th mat-header-cell *matHeaderCellDef>{{ column }}</th>
+    <td mat-cell *matCellDef="let element"> {{ element[column] }}</td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+  <tr mat-row
+      *matRowDef="let table; columns: columnsToDisplay"
+      class="table-row"></tr>
+</table>
