@@ -4,7 +4,6 @@ from flask_cors import CORS
 
 from controllers.database_controller import DatabaseTableController, DatabaseConnectController, DatabaseTablesController
 
-
 app = Flask(__name__, static_url_path='')
 CORS(app)
 api = Api(app)
