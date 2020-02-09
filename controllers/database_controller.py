@@ -3,25 +3,15 @@ import json
 from services.database_service import DatabaseService
 import datetime
 
-
-class Rows(fields.Raw):
-    def format(self, value):
-        print(value)
-        if isinstance(value, datetime.datetime):
-            return value.__str__()
-        else:
-            return {k: v.__str__() for (k, v) in value}
-
-
-
-
-
+class DatabaseConnectController(Resource):
+    pass
 
 class DatabaseMetaController(Resource):
 
     #@marshal_with(db_fields)
     def get(self, database, table):
-        d = DatabaseService.select(database, table, 5)
+        service = DatabaseService(database)
+        d = service.select(table, 5)
 
         row = d.rows[0]
         row_fields = {}
@@ -32,13 +22,22 @@ class DatabaseMetaController(Resource):
                 row_fields[k] = fields.String
             elif isinstance(v, int):
                 row_fields[k] = fields.Integer
+            elif isinstance(v, float):
+                row_fields[k] = fields.Float
+            elif isinstance(v, bool):
+                row_fields[k] = fields.Boolean
             elif isinstance(v, datetime.date):
                 row_fields[k] = fields.String
             else:
                 row_fields[k] = fields.Raw
 
+        ref_fields = {
+            'table': fields.String,
+            'column': fields.String
+        }
         col_fields = {
-            'name': fields.String
+            'name': fields.String,
+            'ref_from': fields.List(fields.Nested(ref_fields))
         }
 
         db_fields = {
