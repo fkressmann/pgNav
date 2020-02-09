@@ -37,46 +37,60 @@ export class TableService {
   }
 
   mockTableData(tableName: string): Observable<TableResponse> {
-    const customers: Person[] = [
-      { id: 1, firstname: 'Hans', lastname: 'Wurst', sex: 'male', age: 18 },
-      { id: 2, firstname: 'Clara', lastname: 'Kant', sex: 'female', age: 25 },
-      { id: 3, firstname: 'Kent', lastname: 'Clark', sex: 'male', age: 37 },
-    ];
+    const customers: TableResponse = {
+      rows: [
+        { id: 1, firstname: 'Hans', lastname: 'Wurst', sex: 'male', age: 18 },
+        { id: 2, firstname: 'Clara', lastname: 'Kant', sex: 'female', age: 25 },
+        { id: 3, firstname: 'Kent', lastname: 'Clark', sex: 'male', age: 37 },
+      ],
+      columns: [
+        { name: 'id'}, { name: 'firstname'}, { name: 'lastname'}, { name: 'sex' }, { name: 'age' }
+      ],
+      name: 'customers',
+      refsTo: [
+        { table: 'products' },
+        { table: 'clients' },
+      ],
+      refsFrom: [
+        { table: 'clients' },
+        { table: 'products' }
+      ]
+    };
 
-    const products: any[] = [
-      { id: 1, name: 'Dicer', model: '2000', make: 'Nicer' },
-      { id: 2, name: 'VW Polo', model: 'Polo', make: 'VW' },
-      { id: 3, name: 'Dude', model: 'Houston', make: 'Texas' },
-    ];
+    const products: TableResponse = {
+      rows: [
+        { id: 1, name: 'Dicer', model: '2000', make: 'Nicer' },
+        { id: 2, name: 'VW Polo', model: 'Polo', make: 'VW' },
+        { id: 3, name: 'Dude', model: 'Houston', make: 'Texas' },
+      ],
+      columns: [
+        { name: 'id' }, { name: 'name' }, { name: 'model' }, { name: 'make'}
+      ],
+      name: 'products',
+      refsTo: [],
+      refsFrom: []
+    };
 
-    const clients: any[] = [
-      { id: 1, name: 'Allocato GmbH' },
-      { id: 2, name: 'Syraro AG' },
-      { id: 3, name: 'Schnibbel mbH' },
-    ];
+    const clients: TableResponse = {
+      rows: [
+        { id: 1, name: 'Allocato GmbH' },
+        { id: 2, name: 'Syraro AG' },
+        { id: 3, name: 'Schnibbel mbH' },
+      ],
+      columns: [
+        { name: 'id' }, { name: 'name' }
+      ],
+      name: 'clients',
+      refsTo: [
+        { table: 'products' }
+      ],
+      refsFrom: []
+    };
 
     const mappings = {
-      customers: {
-        rows: customers,
-        columns: [
-          { name: 'id'}, { name: 'firstname'}, { name: 'lastname'}, { name: 'sex' }, { name: 'age' }
-        ],
-        name: 'customers'
-      },
-      products: {
-        rows: products,
-        columns: [
-          { name: 'id' }, { name: 'name' }, { name: 'model' }, { name: 'make'}
-        ],
-        name: 'products'
-      },
-      clients: {
-        rows: clients,
-        columns: [
-          { name: 'id' }, { name: 'name' }
-        ],
-        name: 'clients'
-      }
+      customers,
+      products,
+      clients
     };
 
     return of(mappings[tableName]);
