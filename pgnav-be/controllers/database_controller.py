@@ -36,13 +36,13 @@ class DatabaseTablesController(Resource):
     @marshal_with(table_name_fields)
     def get(self):
         if service:
-            return service.get_all_tables()
+            return service.tables
         else:
             raise no_db
 
 
 class DatabaseTableController(Resource):
-    def get(self, table):
+    def get(self, table):  # ToDo: refactor table to table_name, needs FE!
         if service:
             args = table_query_parser.parse_args()
             # handle limit & offset
