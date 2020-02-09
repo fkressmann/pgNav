@@ -119,7 +119,7 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
    * @param column the column of the cell that was clicked
    * @param value the value of that cell
    */
-  openViewRefsDialog(column, value: any) {
+  openViewRefsDialog(column: string, value: any) {
     const element = this.columns.find(col => col.name === column);
     const refsFrom = element.ref_from;
     const refsTo = element.ref_to;
@@ -127,6 +127,28 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
       width: '1000px',
       data: { table: this.tableName, column, value, refsFrom, refsTo }
     });
+  }
+
+  /**
+   * conditionally get css class for table-cell to prevent
+   * the text from appearing as a link
+   * @param column
+   */
+  getTableCellClass(column: string) {
+    if (this.hasRefs(column)) {
+      return 'table-cell';
+    } else {
+      return '';
+    }
+  }
+
+  /**
+   * checks whether the column has any refs
+   * @param column
+   */
+  hasRefs(column: string) {
+    const element = this.columns.find(col => col.name === column);
+    return element.ref_from.length > 0 || element.ref_to.length > 0;
   }
 
 }
