@@ -1,7 +1,4 @@
-import { TableService } from './../core/table.service';
 import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Person } from '../core/person.model';
 
 @Component({
   selector: 'pgnav-ui-table-view-cards',

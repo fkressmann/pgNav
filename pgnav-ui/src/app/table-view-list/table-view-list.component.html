@@ -1,4 +1,9 @@
-<table mat-table [dataSource]="data" class="mat-elevation-z8">
+<mat-form-field>
+  <mat-label>Filter</mat-label>
+  <input matInput (keyup)="applyFilter($event)" placeholder="Type to search">
+</mat-form-field>
+
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
   <ng-container [matColumnDef]="column" *ngFor="let column of displayedColumns">
     <th mat-header-cell *matHeaderCellDef>{{ column }}</th>
     <td mat-cell *matCellDef="let element"> {{ element[column] }}</td>
