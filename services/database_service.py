@@ -40,6 +40,7 @@ class DatabaseService:
         result = self.cursor.fetchall()
         # Create strings from one-element-tuples
         tables = [Table(name[0]) for name in result]
+        tables.sort(key=lambda table: table.name)
         return tables
 
     def select(self, table_name, limit=25, filter_column=None, filter_value=None):
@@ -109,6 +110,7 @@ class DatabaseService:
             regex = parser.search(ref[1])
             foreign_col = regex.group(1)
             d_refs.append(Reference(regex.group(3), ref[0], foreign_col))
+        d_refs.sort(key=lambda ref: ref.table)
         return d_refs
 
     def get_ref_to(self, oid):
@@ -120,6 +122,7 @@ class DatabaseService:
         for ref in refs:
             regex = parser.search(ref[0])
             d_refs.append(Reference(regex.group(1), regex.group(2), regex.group(3)))
+        d_refs.sort(key=lambda ref: ref.table)
         return d_refs
 
     def get_primary_keys(self, oid):

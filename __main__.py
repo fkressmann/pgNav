@@ -17,8 +17,4 @@ api.add_resource(DatabaseTablesController, prefix + '/tables')
 
 @app.route('/')
 def hello_world():
-    return 'Flask running'
-#    return app.send_static_file('index.html')
-
-
-#app.run(debug=True, host='0.0.0.0')
+    return app.send_static_file('index.html')
