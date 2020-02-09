@@ -1,10 +1,10 @@
 import { Column } from './../core/column.model';
 import { TableDetailsAddDialogComponent } from './../table-details-add-dialog/table-details-add-dialog.component';
 import { TableService } from './../core/table.service';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, distinctUntilChanged, map } from 'rxjs/operators';
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
-import { Subject } from 'rxjs';
+import { ActivatedRoute, Params, Router, RouterEvent, NavigationEnd } from '@angular/router';
+import { Subject, combineLatest } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
@@ -19,11 +19,18 @@ import { TableMeta } from '../core/table-meta.model';
 export class TableDetailsComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatTable) table: MatTable<any>;
-  @ViewChild(MatSort, {static: true}) sort: MatSort;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
 
-  constructor(private route: ActivatedRoute, private tableService: TableService, private dialog: MatDialog) { }
+  constructor(
+    private route: ActivatedRoute,
+    private tableService: TableService,
+    private dialog: MatDialog,
+    private router: Router) { }
 
   tableName: string;
+  filterColumn: string;
+  filterValue: string;
+
   destroy$: Subject<boolean> = new Subject();
 
   dataSource: MatTableDataSource<any>;
@@ -33,29 +40,52 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
   columns: any[];
 
   ngOnInit(): void {
-    // take the tableName from the route
+    this.tableName = this.route.snapshot.params['table'];
+
     this.route.params.pipe(
       takeUntil(this.destroy$)
-    ).subscribe( (params: Params) => {
-      this.tableName = params['table'];
+    ).subscribe((params: Params) => {
+      // for whatever reason the observable fires twices on route changes
+      // thus check whether the route actually changed or is still the old one
+      if (this.tableName !== params['table']) {
+        this.tableName = params['table'];
 
-      this.tableService.getTableData(this.tableName).pipe(
-        takeUntil(this.destroy$)
-      ).subscribe( (response: TableMeta) => {
-        this.dataSource = new MatTableDataSource(response.rows);
-        this.columnsToDisplay = response.columns.map(col => col.name);
-        this.displayedColumns = response.columns.map(col => col.name);
+        this.route.queryParams.pipe(
+          takeUntil(this.destroy$)
+        ).subscribe((params: Params) => {
+          this.filterColumn = params['filter_column'];
+          this.filterValue = params['by_value'];
 
-        this.columns = response.columns;
+          this.tableService.getTableData(this.tableName, this.filterColumn, this.filterValue).pipe(
+            takeUntil(this.destroy$)
+          ).subscribe((response: TableMeta) => {
+            this.dataSource = new MatTableDataSource(response.rows);
+            this.columnsToDisplay = response.columns.map(col => col.name);
+            this.displayedColumns = response.columns.map(col => col.name);
 
+            this.columns = response.columns;
 
-        console.table(this.columns)
+            // activate sorting
+            this.dataSource.sort = this.sort;
+          });
+        });
+      } else {
+        this.tableService.getTableData(this.tableName).pipe(
+          takeUntil(this.destroy$)
+        ).subscribe((response: TableMeta) => {
+          this.dataSource = new MatTableDataSource(response.rows);
+          this.columnsToDisplay = response.columns.map(col => col.name);
+          this.displayedColumns = response.columns.map(col => col.name);
 
-        // activate sorting
-        this.dataSource.sort = this.sort;
-      });
+          this.columns = response.columns;
+
+          // activate sorting
+          this.dataSource.sort = this.sort;
+        });
+      }
     });
   }
+
 
   ngOnDestroy(): void {
     this.destroy$.next(true);
