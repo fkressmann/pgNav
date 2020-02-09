@@ -38,17 +38,7 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
     ).subscribe( (params: Params) => {
       this.tableName = params['table'];
 
-
-      let observable;
-
-      if (this.tableName === 'allocations') {
-        observable = this.tableService.getTableData(this.tableName);
-      } else {
-        // get the actual data by passing the tableName just retrieved
-        observable = this.tableService.mockTableData(this.tableName);
-      }
-
-      observable.pipe(
+      this.tableService.getTableData(this.tableName).pipe(
         takeUntil(this.destroy$)
       ).subscribe( (response: TableResponse) => {
         this.dataSource = new MatTableDataSource(response.rows);
