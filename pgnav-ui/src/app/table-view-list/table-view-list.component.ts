@@ -1,3 +1,4 @@
+import { MatTableDataSource } from '@angular/material/table';
 import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
@@ -13,12 +14,19 @@ export class TableViewListComponent implements OnInit {
   @Input() data: any[];
   @Input() definitions: string[];
 
+  dataSource: MatTableDataSource<any>;
   columnsToDisplay: string[];
   displayedColumns: string[];
 
   ngOnInit(): void {
+    this.dataSource = new MatTableDataSource(this.data);
     this.columnsToDisplay = this.definitions.slice();
     this.displayedColumns = this.definitions.slice();
+  }
+
+  applyFilter($event) {
+    const filterValue = ($event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
 }

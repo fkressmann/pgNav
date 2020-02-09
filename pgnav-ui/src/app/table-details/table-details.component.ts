@@ -24,7 +24,7 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
   tableName: string;
   destroy$: Subject<boolean> = new Subject();
 
-  tableData: MatTableDataSource<any>;
+  dataSource: MatTableDataSource<any>;
   columnsToDisplay: string[];
   displayedColumns: string[];
   refsTo: any[];
@@ -50,7 +50,7 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
       observable.pipe(
         takeUntil(this.destroy$)
       ).subscribe( (response: TableResponse) => {
-        this.tableData = new MatTableDataSource(response.rows);
+        this.dataSource = new MatTableDataSource(response.rows);
         this.columnsToDisplay = response.columns.map(col => col.name);
         this.displayedColumns = response.columns.map(col => col.name);
 
@@ -58,7 +58,7 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
         this.refsFrom = response.refsFrom;
 
         // activate sorting
-        this.tableData.sort = this.sort;
+        this.dataSource.sort = this.sort;
       });
     });
   }
@@ -79,10 +79,15 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
 
     dialogReference.afterClosed().subscribe(result => {
       // MatTableDataSource stores the actual data in the data property
-      result.id = this.tableData.data.length + 1;
-      this.tableData.data.push(result);
+      result.id = this.dataSource.data.length + 1;
+      this.dataSource.data.push(result);
       this.table.renderRows();
     });
+  }
+
+  applyFilter($event) {
+    const filterValue = ($event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
 }
