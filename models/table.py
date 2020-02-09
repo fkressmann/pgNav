@@ -8,3 +8,6 @@ class Table(BaseModel):
         self.name = name
         self.columns = columns
         self.rows = rows
+
+    def __init__(self, name):
+        self.name = name

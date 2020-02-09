@@ -13,29 +13,33 @@ from models.ref_from import RefFrom
 
 class DatabaseService:
 
-    def __init__(self, database):
+    def __init__(self, host, port, user, password, database):
+        self.host = host
+        self.port = port
+        self.user = user
+        self.password = password
         self.database = database
-        self.cursor = False
-        self.dict_cursor = False
-        self.connect()
+        self.connection = self.connect()
+        self.cursor = self.connection.cursor()
+        self.dict_cursor = self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     def connect(self):
         try:
-            connection = psycopg2.connect(user=environ.get("db_user"),
-                                          password=environ.get("db_pass"),
-                                          host=environ.get("db_host"),
-                                          port="5432",
-                                          database=self.database)
-
-            self.dict_cursor = connection.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-            self.cursor = connection.cursor()
-            # Print PostgreSQL Connection properties
-            print(connection.get_dsn_parameters(), "\n")
+            return psycopg2.connect(user=self.user,
+                                    password=self.password,
+                                    host=self.host,
+                                    port=self.port,
+                                    database=self.database)
 
         except (Exception, psycopg2.Error) as error:
             print("Error while connecting to PostgreSQL", error)
 
-
+    def get_all_tables(self):
+        query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
+        tables = [Table(name[0]) for name in result]
+        return tables
 
     def select(self, table, limit=25):
         oid = self.get_table_oid(table)
@@ -49,9 +53,9 @@ class DatabaseService:
         refs = self.get_ref_from(oid)
         print(refs)
 
-        for k, v in refs.items():
-            f = filter(lambda column: column.name == k, columns)
-            next(f).add_ref_from(v)
+        for ref in refs:
+            f = filter(lambda column: column.name == ref.source_col, columns)
+            next(f).add_ref_from(ref)
 
         return Table(0, table, columns, data)
 
@@ -69,12 +73,9 @@ class DatabaseService:
         print(self.cursor.query)
         refs = self.cursor.fetchall()
         print(refs)
-        d_refs = {}
+        d_refs = []
         for ref in refs:
             regex = parser.search(ref[1])
             foreign_col = regex.group(1)
-            d_refs.update({regex.group(3): RefFrom(ref[0], foreign_col)})
+            d_refs.append(RefFrom(regex.group(3), ref[0], foreign_col))
         return d_refs
-
-
-
