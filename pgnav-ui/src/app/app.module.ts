@@ -13,6 +13,7 @@ import { TableDetailsAddDialogComponent } from './table-details-add-dialog/table
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { ForeignKeyRefsComponent } from './foreign-key-refs/foreign-key-refs.component';
+import { NavbarComponent } from './navbar/navbar.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { ForeignKeyRefsComponent } from './foreign-key-refs/foreign-key-refs.com
     TableViewComponent,
     TableDetailsComponent,
     TableDetailsAddDialogComponent,
-    ForeignKeyRefsComponent
+    ForeignKeyRefsComponent,
+    NavbarComponent
   ],
   imports: [
     BrowserModule,
