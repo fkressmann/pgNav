@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 
-from controllers.database_controller import DatabaseMetaController
+from controllers.database_controller import DatabaseMetaController, DatabaseConnectController, DatabaseTablesController
 
 
 app = Flask(__name__, static_url_path='')
@@ -10,7 +10,9 @@ CORS(app)
 api = Api(app)
 
 prefix = "/api"
-api.add_resource(DatabaseMetaController, prefix + '/db/<string:database>/table/<string:table>')
+api.add_resource(DatabaseMetaController, prefix + '/table/<string:table>')
+api.add_resource(DatabaseConnectController, prefix + '/connect')
+api.add_resource(DatabaseTablesController, prefix + '/tables')
 
 
 @app.route('/')
