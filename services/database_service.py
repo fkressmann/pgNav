@@ -3,13 +3,12 @@ import psycopg2.extras
 from psycopg2 import sql
 import re
 from werkzeug.exceptions import BadRequest, InternalServerError
-
-# Parse shit like 'FOREIGN KEY (allocation_id) REFERENCES allocations(id)'
-parser = re.compile("FOREIGN KEY \\(([\\w_]*)\\) REFERENCES ([\\w_]*)\\(([\\w_]*)\\)")
-
 from models.table import Table
 from models.column import Column
 from models.refs import Reference
+
+# Parse shit like 'FOREIGN KEY (allocation_id) REFERENCES allocations(id)'
+parser = re.compile("FOREIGN KEY \\(([\\w_]*)\\) REFERENCES ([\\w_]*)\\(([\\w_]*)\\)")
 
 
 class DatabaseService:
@@ -56,6 +55,8 @@ class DatabaseService:
             query = sql.SQL("SELECT * FROM {} LIMIT %s").format(sql.Identifier(table_name))
             self.query_executor(self.dict_cursor, query, (limit,))
         print(self.dict_cursor.query)
+
+        # Build columns from cursor description
         ddl = self.dict_cursor.description
         columns = [Column(c) for c in ddl]
         data = self.dict_cursor.fetchall()
@@ -78,6 +79,12 @@ class DatabaseService:
             f = filter(lambda column: column.name == ref.source_col, columns)
             next(f).add_ref_to(ref)
 
+        # Get primary attributes
+        pk_s = self.get_primary_keys(oid)
+        for pk in pk_s:
+            f = filter(lambda column: column.name == pk, columns)
+            next(f).set_primary()
+
         return Table(table_name, oid, columns, data)
 
     def get_table_oid(self, table):
@@ -92,7 +99,8 @@ class DatabaseService:
             raise BadRequest("Table '{}' does not exist".format(table))
 
     def get_ref_from(self, oid):
-        query = "SELECT conrelid::pg_catalog.regclass, pg_catalog.pg_get_constraintdef(c.oid, true) as condef FROM pg_catalog.pg_constraint c WHERE c.confrelid = %s AND c.contype = 'f' ORDER BY 1;"
+        query = "SELECT conrelid::pg_catalog.regclass, pg_catalog.pg_get_constraintdef(c.oid, true) as condef FROM " \
+                "pg_catalog.pg_constraint c WHERE c.confrelid = %s AND c.contype = 'f' ORDER BY 1; "
         self.query_executor(self.cursor, query, (oid,))
         print(self.cursor.query)
         refs = self.cursor.fetchall()
@@ -104,7 +112,8 @@ class DatabaseService:
         return d_refs
 
     def get_ref_to(self, oid):
-        query = "SELECT pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = %s AND r.contype = 'f' ORDER BY 1;"
+        query = "SELECT pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE " \
+                "r.conrelid = %s AND r.contype = 'f' ORDER BY 1; "
         self.query_executor(self.cursor, query, (oid,))
         refs = self.cursor.fetchall()
         d_refs = []
@@ -113,6 +122,15 @@ class DatabaseService:
             d_refs.append(Reference(regex.group(1), regex.group(2), regex.group(3)))
         return d_refs
 
+    def get_primary_keys(self, oid):
+        query = "SELECT attname FROM pg_index i JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(" \
+                "i.indkey) WHERE  i.indrelid = %s AND i.indisprimary; "
+        self.query_executor(self.cursor, query, (oid,))
+        result = self.cursor.fetchall()
+        keys = [k for k in result[0]]
+        return keys
+
+    # Handle cursor execution here to handle exceptions centrally
     def query_executor(self, cursor, query, params=False):
         try:
             if not params:
@@ -127,3 +145,7 @@ class DatabaseService:
             print(e)
             self.connection.rollback()
             raise BadRequest(e.diag.message_primary)
+        except Exception as e:
+            print(e)
+            self.connection.rollback()
+            raise InternalServerError(e)
