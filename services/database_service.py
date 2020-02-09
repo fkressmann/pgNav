@@ -4,6 +4,7 @@ from psycopg2 import sql
 from os import environ
 import re
 
+# Parse shit like 'FOREIGN KEY (allocation_id) REFERENCES allocations(id)'
 parser = re.compile("FOREIGN KEY \\(([\\w_]*)\\) REFERENCES ([\\w_]*)\\(([\\w_]*)\\)")
 
 from models.table import Table
@@ -38,11 +39,13 @@ class DatabaseService:
         query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
         self.cursor.execute(query)
         result = self.cursor.fetchall()
+        # Create strings from one-element-tuples
         tables = [Table(name[0]) for name in result]
         return tables
 
     def select(self, table_name, limit=25, filter_column=None, filter_value=None):
         oid = self.get_table_oid(table_name)
+        # Different queries with and without filter
         if filter_column and filter_value:
             query = sql.SQL("SELECT * FROM {} WHERE {}={} LIMIT %s").format(
                 sql.Identifier(table_name),
@@ -57,11 +60,19 @@ class DatabaseService:
         columns = [Column(c) for c in ddl]
         data = self.dict_cursor.fetchall()
 
+        # Set column types from data if existing (not if 0 rows received)
+        if len(data) != 0:
+            for k, v in data[0].items():
+                f = filter(lambda column: column.name == k, columns)
+                next(f).set_type(type(v).__name__)
+
+        # Get tables referencing this one and add then to the corresponding column
         refs_from = self.get_ref_from(oid)
         for ref in refs_from:
             f = filter(lambda column: column.name == ref.source_col, columns)
             next(f).add_ref_from(ref)
 
+        # Get tables referenced by this one and ...
         refs_to = self.get_ref_to(oid)
         for ref in refs_to:
             f = filter(lambda column: column.name == ref.source_col, columns)
