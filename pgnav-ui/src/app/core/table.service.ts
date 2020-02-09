@@ -15,6 +15,9 @@ export class TableService {
       { id: 1, name: 'customers', entries: 1024 },
       { id: 2, name: 'products', entries: 15726 },
       { id: 3, name: 'clients', entries: 57 },
+      { id: 4, name: 'incidents', entries: 1301 },
+      { id: 5, name: 'feedback', entries: 107 },
+      { id: 6, name: 'contacts', entries: 213 },
     ];
     return of(tables);
   }
