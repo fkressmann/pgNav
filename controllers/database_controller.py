@@ -1,5 +1,5 @@
 from flask_restful import Resource, fields, marshal_with, reqparse, marshal
-import json
+from werkzeug.exceptions import BadRequest, InternalServerError
 from services.database_service import DatabaseService
 import datetime
 
@@ -32,7 +32,10 @@ class DatabaseConnectController(Resource):
 class DatabaseTablesController(Resource):
     @marshal_with(table_name_fields)
     def get(self):
-        return service.get_all_tables()
+        if service:
+            return service.get_all_tables()
+        else:
+            raise BadRequest("Need to connect to DB first, use /connect")
 
 
 class DatabaseTableController(Resource):
