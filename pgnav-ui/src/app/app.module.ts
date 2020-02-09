@@ -15,6 +15,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ForeignKeyRefsComponent } from './foreign-key-refs/foreign-key-refs.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { LoginComponent } from './login/login.component';
+import { PropertiesArrayPipe } from './table-details/properties-array.pipe';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { LoginComponent } from './login/login.component';
     TableDetailsAddDialogComponent,
     ForeignKeyRefsComponent,
     NavbarComponent,
-    LoginComponent
+    LoginComponent,
+    PropertiesArrayPipe
   ],
   imports: [
     BrowserModule,
@@ -36,7 +38,8 @@ import { LoginComponent } from './login/login.component';
     FormsModule,
     HttpClientModule
   ],
-  providers: [],
+  providers: [
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

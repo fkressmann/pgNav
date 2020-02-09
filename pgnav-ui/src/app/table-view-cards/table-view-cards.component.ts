@@ -1,3 +1,4 @@
+import { Table } from './../core/table.model';
 import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
@@ -8,7 +9,7 @@ import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core
 })
 export class TableViewCardsComponent implements OnInit {
 
-  @Input() data: any[];
+  @Input() tables: Table[];
 
   constructor() { }
 

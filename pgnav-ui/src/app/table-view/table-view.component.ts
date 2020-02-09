@@ -1,7 +1,7 @@
-import { Table } from './../core/table.model';
 import { TableService } from './../core/table.service';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Table } from '../core/table.model';
 
 @Component({
   selector: 'pgnav-ui-table-view',

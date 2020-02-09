@@ -1,3 +1,4 @@
+import { TableDetailsModel } from './../core/table-details.model';
 import { Column } from './../core/column.model';
 import { TableDetailsAddDialogComponent } from './../table-details-add-dialog/table-details-add-dialog.component';
 import { TableService } from './../core/table.service';
@@ -9,7 +10,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { ForeignKeyRefsComponent } from '../foreign-key-refs/foreign-key-refs.component';
-import { TableMeta } from '../core/table-meta.model';
 
 @Component({
   selector: 'pgnav-ui-table-details',
@@ -24,8 +24,7 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private tableService: TableService,
-    private dialog: MatDialog,
-    private router: Router) { }
+    private dialog: MatDialog) { }
 
   tableName: string;
   filterColumn: string;
@@ -33,10 +32,8 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
 
   destroy$: Subject<boolean> = new Subject();
 
-  dataSource: MatTableDataSource<any>;
+  data: any;
   columnsToDisplay: string[];
-  displayedColumns: string[];
-
   columns: any[];
 
   ngOnInit(): void {
@@ -58,29 +55,20 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
 
           this.tableService.getTableData(this.tableName, this.filterColumn, this.filterValue).pipe(
             takeUntil(this.destroy$)
-          ).subscribe((response: TableMeta) => {
-            this.dataSource = new MatTableDataSource(response.rows);
+          ).subscribe((response: TableDetailsModel) => {
+            this.data = response.rows;
             this.columnsToDisplay = response.columns.map(col => col.name);
-            this.displayedColumns = response.columns.map(col => col.name);
-
-            this.columns = response.columns;
-
-            // activate sorting
-            this.dataSource.sort = this.sort;
           });
         });
       } else {
         this.tableService.getTableData(this.tableName).pipe(
           takeUntil(this.destroy$)
-        ).subscribe((response: TableMeta) => {
-          this.dataSource = new MatTableDataSource(response.rows);
-          this.columnsToDisplay = response.columns.map(col => col.name);
-          this.displayedColumns = response.columns.map(col => col.name);
-
+        ).subscribe((response: TableDetailsModel) => {
+          this.data = response.rows;
           this.columns = response.columns;
+          this.columnsToDisplay = response.columns.map(col => col.name);
 
-          // activate sorting
-          this.dataSource.sort = this.sort;
+          console.table(this.columnsToDisplay)
         });
       }
     });
@@ -103,29 +91,24 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
 
     dialogReference.afterClosed().subscribe(result => {
       // MatTableDataSource stores the actual data in the data property
-      result.id = this.dataSource.data.length + 1;
-      this.dataSource.data.push(result);
+      result.id = this.data.length + 1;
+      this.data.push(result);
       this.table.renderRows();
     });
   }
 
-  applyFilter($event) {
-    const filterValue = ($event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-  }
-
   /**
    *
-   * @param column the column of the cell that was clicked
+   * @param columnName the column of the cell that was clicked
    * @param value the value of that cell
    */
-  openViewRefsDialog(column: string, value: any) {
-    const element = this.columns.find(col => col.name === column);
-    const refsFrom = element.ref_from;
-    const refsTo = element.ref_to;
+  openViewRefsDialog(columnName: any, value: string) {
+    const column = this.getColumnFromColumnName(columnName);
+    const refsFrom = column.ref_from;
+    const refsTo = column.ref_to;
     this.dialog.open(ForeignKeyRefsComponent, {
       width: '1000px',
-      data: { table: this.tableName, column, value, refsFrom, refsTo }
+      data: { table: this.tableName, column: column.name, value, refsFrom, refsTo }
     });
   }
 
@@ -144,11 +127,20 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
 
   /**
    * checks whether the column has any refs
-   * @param column
+   * @param columnName
    */
-  hasRefs(column: string) {
-    const element = this.columns.find(col => col.name === column);
-    return element.ref_from.length > 0 || element.ref_to.length > 0;
+  hasRefs(columnName: any) {
+    const column = this.getColumnFromColumnName(columnName);
+    return column.ref_from.length > 0 || column.ref_to.length > 0;
+  }
+
+  isPrimary(columnName: string): boolean {
+    const column = this.columns.find(col => col.name === columnName);
+    return column.is_primary;
+  }
+
+  getColumnFromColumnName(columnName: string): any {
+    return this.columns.find(col => col.name === columnName);
   }
 
 }

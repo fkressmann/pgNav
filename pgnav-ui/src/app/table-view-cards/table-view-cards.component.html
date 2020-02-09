@@ -1,6 +1,6 @@
 <div class="cards-wrapper">
   <mat-card
-    *ngFor="let table of data"
+    *ngFor="let table of tables"
     class="table-card mx-2 my-2"
     [routerLink]="table.name"
     [matTooltip] ="'See details of ' + table.name"
@@ -8,7 +8,6 @@
     aria-label="Button that displays a tooltip in various positions">
     <mat-card-header>
       <mat-card-title>{{ table.name }}</mat-card-title>
-      <mat-card-subtitle>{{ table.entries }} entries</mat-card-subtitle>
     </mat-card-header>
   </mat-card>
 </div>
