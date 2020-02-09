@@ -4,11 +4,12 @@ from psycopg2 import sql
 from os import environ
 import re
 
+# Parse shit like 'FOREIGN KEY (allocation_id) REFERENCES allocations(id)'
 parser = re.compile("FOREIGN KEY \\(([\\w_]*)\\) REFERENCES ([\\w_]*)\\(([\\w_]*)\\)")
 
 from models.table import Table
 from models.column import Column
-from models.ref_from import RefFrom
+from models.refs import Reference
 
 
 class DatabaseService:
@@ -38,24 +39,44 @@ class DatabaseService:
         query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
         self.cursor.execute(query)
         result = self.cursor.fetchall()
+        # Create strings from one-element-tuples
         tables = [Table(name[0]) for name in result]
         return tables
 
-    def select(self, table_name, limit=25):
+    def select(self, table_name, limit=25, filter_column=None, filter_value=None):
         oid = self.get_table_oid(table_name)
-
-        query = sql.SQL("SELECT * FROM {} LIMIT %s").format(sql.Identifier(table_name))
-        self.dict_cursor.execute(query, (limit,))
+        # Different queries with and without filter
+        if filter_column and filter_value:
+            query = sql.SQL("SELECT * FROM {} WHERE {}={} LIMIT %s").format(
+                sql.Identifier(table_name),
+                sql.Identifier(filter_column),
+                sql.Placeholder())
+            self.dict_cursor.execute(query, (filter_value, limit))
+        else:
+            query = sql.SQL("SELECT * FROM {} LIMIT %s").format(sql.Identifier(table_name))
+            self.dict_cursor.execute(query, (limit,))
+        print(self.dict_cursor.query)
         ddl = self.dict_cursor.description
         columns = [Column(c) for c in ddl]
         data = self.dict_cursor.fetchall()
 
-        refs = self.get_ref_from(oid)
-        print(refs)
+        # Set column types from data if existing (not if 0 rows received)
+        if len(data) != 0:
+            for k, v in data[0].items():
+                f = filter(lambda column: column.name == k, columns)
+                next(f).set_type(type(v).__name__)
 
-        for ref in refs:
+        # Get tables referencing this one and add then to the corresponding column
+        refs_from = self.get_ref_from(oid)
+        for ref in refs_from:
             f = filter(lambda column: column.name == ref.source_col, columns)
             next(f).add_ref_from(ref)
+
+        # Get tables referenced by this one and ...
+        refs_to = self.get_ref_to(oid)
+        for ref in refs_to:
+            f = filter(lambda column: column.name == ref.source_col, columns)
+            next(f).add_ref_to(ref)
 
         return Table(table_name, oid, columns, data)
 
@@ -72,10 +93,19 @@ class DatabaseService:
         self.cursor.execute(query, (oid,))
         print(self.cursor.query)
         refs = self.cursor.fetchall()
-        print(refs)
         d_refs = []
         for ref in refs:
             regex = parser.search(ref[1])
             foreign_col = regex.group(1)
-            d_refs.append(RefFrom(regex.group(3), ref[0], foreign_col))
+            d_refs.append(Reference(regex.group(3), ref[0], foreign_col))
+        return d_refs
+
+    def get_ref_to(self, oid):
+        query = "SELECT pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = %s AND r.contype = 'f' ORDER BY 1;"
+        self.cursor.execute(query, (oid,))
+        refs = self.cursor.fetchall()
+        d_refs = []
+        for ref in refs:
+            regex = parser.search(ref[0])
+            d_refs.append(Reference(regex.group(1), regex.group(2), regex.group(3)))
         return d_refs
