@@ -10,6 +10,10 @@ connection_request_parser.add_argument('db_user')
 connection_request_parser.add_argument('db_pass')
 connection_request_parser.add_argument('db_name')
 
+table_query_parser = reqparse.RequestParser()
+table_query_parser.add_argument('filter_column')
+table_query_parser.add_argument('by_value')
+
 service = None
 
 table_name_fields = {
@@ -31,27 +35,29 @@ class DatabaseTablesController(Resource):
         return service.get_all_tables()
 
 
-class DatabaseMetaController(Resource):
+class DatabaseTableController(Resource):
     def get(self, table):
-        d = service.select(table, 5)
+        args = table_query_parser.parse_args()
+        d = service.select(table, 20, args['filter_column'], args['by_value'])
 
-        row = d.rows[0]
         row_fields = {}
-        for k, v in row.items():
-            if isinstance(v, datetime.datetime):
-                row_fields[k] = fields.DateTime(dt_format='iso8601')
-            elif isinstance(v, str):
-                row_fields[k] = fields.String
-            elif isinstance(v, int):
-                row_fields[k] = fields.Integer
-            elif isinstance(v, float):
-                row_fields[k] = fields.Float
-            elif isinstance(v, bool):
-                row_fields[k] = fields.Boolean
-            elif isinstance(v, datetime.date):
-                row_fields[k] = fields.String
-            else:
-                row_fields[k] = fields.Raw
+        if len(d.rows) != 0:
+            row = d.rows[0]
+            for k, v in row.items():
+                if isinstance(v, datetime.datetime):
+                    row_fields[k] = fields.DateTime(dt_format='iso8601')
+                elif isinstance(v, str):
+                    row_fields[k] = fields.String
+                elif isinstance(v, int):
+                    row_fields[k] = fields.Integer
+                elif isinstance(v, float):
+                    row_fields[k] = fields.Float
+                elif isinstance(v, bool):
+                    row_fields[k] = fields.Boolean
+                elif isinstance(v, datetime.date):
+                    row_fields[k] = fields.String
+                else:
+                    row_fields[k] = fields.Raw
 
         ref_fields = {
             'table': fields.String,
@@ -60,7 +66,9 @@ class DatabaseMetaController(Resource):
 
         col_fields = {
             'name': fields.String,
-            'ref_from': fields.List(fields.Nested(ref_fields))
+            'type': fields.String,
+            'ref_from': fields.List(fields.Nested(ref_fields)),
+            'ref_to': fields.List(fields.Nested(ref_fields))
         }
 
         db_fields = {
