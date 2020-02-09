@@ -10,7 +10,7 @@ CORS(app)
 api = Api(app)
 
 prefix = "/api"
-api.add_resource(DatabaseMetaController, prefix + '/db/<string:database>/table/<string:table>')
+api.add_resource(DatabaseMetaController, prefix + '/table/<string:table>')
 api.add_resource(DatabaseConnectController, prefix + '/connect')
 api.add_resource(DatabaseTablesController, prefix + '/tables')
 

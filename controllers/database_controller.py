@@ -16,12 +16,14 @@ table_name_fields = {
     'name': fields.String
 }
 
+
 class DatabaseConnectController(Resource):
     def post(self):
         global service
         args = connection_request_parser.parse_args()
         service = DatabaseService(args['db_host'], args['db_port'], args['db_user'], args['db_pass'], args['db_name'])
         return 'Created :)'
+
 
 class DatabaseTablesController(Resource):
     @marshal_with(table_name_fields)
@@ -30,8 +32,6 @@ class DatabaseTablesController(Resource):
 
 
 class DatabaseMetaController(Resource):
-
-    #@marshal_with(db_fields)
     def get(self, table):
         d = service.select(table, 5)
 
@@ -69,9 +69,6 @@ class DatabaseMetaController(Resource):
             'rows': fields.Nested(row_fields)
         }
 
-
-
-        #return json.dumps(d, default=DatabaseMetaController.converter)
         return marshal(d, db_fields)
 
     @staticmethod
