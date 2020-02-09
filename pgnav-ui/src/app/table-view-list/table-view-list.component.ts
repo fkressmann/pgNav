@@ -1,7 +1,7 @@
-import { Table } from './../core/table.model';
 import { MatTableDataSource, MatTable } from '@angular/material/table';
 import { Component, OnInit, Input, ChangeDetectionStrategy, AfterViewInit, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
+import { TableMeta } from '../core/table-meta.model';
 
 @Component({
   selector: 'pgnav-ui-table-view-list',
@@ -13,7 +13,7 @@ export class TableViewListComponent implements OnInit {
 
   constructor() { }
 
-  @Input() data: Table[];
+  @Input() data: TableMeta[];
   @Input() definitions: string[];
   @ViewChild(MatSort, {static: true}) sort: MatSort;
 

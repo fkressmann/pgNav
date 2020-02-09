@@ -1,4 +1,4 @@
-import { TableResponse } from './../core/table-response.model';
+import { Column } from './../core/column.model';
 import { TableDetailsAddDialogComponent } from './../table-details-add-dialog/table-details-add-dialog.component';
 import { TableService } from './../core/table.service';
 import { takeUntil } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { ForeignKeyRefsComponent } from '../foreign-key-refs/foreign-key-refs.component';
+import { TableMeta } from '../core/table-meta.model';
 
 @Component({
   selector: 'pgnav-ui-table-details',
@@ -28,8 +29,8 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
   dataSource: MatTableDataSource<any>;
   columnsToDisplay: string[];
   displayedColumns: string[];
-  refsTo: any[];
-  refsFrom: any[];
+
+  columns: any[];
 
   ngOnInit(): void {
     // take the tableName from the route
@@ -40,13 +41,15 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
 
       this.tableService.getTableData(this.tableName).pipe(
         takeUntil(this.destroy$)
-      ).subscribe( (response: TableResponse) => {
+      ).subscribe( (response: TableMeta) => {
         this.dataSource = new MatTableDataSource(response.rows);
         this.columnsToDisplay = response.columns.map(col => col.name);
         this.displayedColumns = response.columns.map(col => col.name);
 
-        this.refsTo = response.refsTo;
-        this.refsFrom = response.refsFrom;
+        this.columns = response.columns;
+
+
+        console.table(this.columns)
 
         // activate sorting
         this.dataSource.sort = this.sort;
@@ -87,9 +90,11 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
    * @param value the value of that cell
    */
   openViewRefsDialog(column, value: any) {
+    const element = this.columns.find(col => col.name === column);
+    const refsFrom = element.ref_from;
     this.dialog.open(ForeignKeyRefsComponent, {
-      width: '600px',
-      data: { table: this.tableName, column, value, refsTo: this.refsTo, refsFrom: this.refsFrom }
+      width: '1000px',
+      data: { table: this.tableName, column, value, refsFrom }
     });
   }
 
