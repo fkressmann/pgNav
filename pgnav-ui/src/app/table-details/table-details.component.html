@@ -36,10 +36,10 @@
       mat-sort-header>{{ column }}
     </th>
     <td
-      class="table-cell"
+      [class]="getTableCellClass(column)"
       mat-cell
       *matCellDef="let element"
-      (click)="openViewRefsDialog(column, element[column])"
+      (click)="hasRefs(column) && openViewRefsDialog(column, element[column])"
     >
       {{ element[column] }}
     </td>
