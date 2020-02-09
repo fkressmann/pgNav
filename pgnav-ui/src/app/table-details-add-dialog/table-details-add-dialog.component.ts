@@ -11,8 +11,7 @@ export class TableDetailsAddDialogComponent implements OnInit {
 
   constructor(
     public dialogRef: MatDialogRef<TableDetailsAddDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData ) {
-    }
+    @Inject(MAT_DIALOG_DATA) public data: DialogData ) {}
 
   ngOnInit(): void {
   }

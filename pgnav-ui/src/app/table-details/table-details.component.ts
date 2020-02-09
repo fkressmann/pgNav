@@ -8,6 +8,7 @@ import { Subject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
+import { ForeignKeyRefsComponent } from '../foreign-key-refs/foreign-key-refs.component';
 
 @Component({
   selector: 'pgnav-ui-table-details',
@@ -68,7 +69,7 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
     this.destroy$.unsubscribe();
   }
 
-  openDialog(): void {
+  openAddEntryDialog(): void {
     const columns = this.columnsToDisplay.slice();
     columns.shift(); // delete the first element: id
 
@@ -88,6 +89,18 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
   applyFilter($event) {
     const filterValue = ($event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  /**
+   *
+   * @param column the column of the cell that was clicked
+   * @param value the value of that cell
+   */
+  openViewRefsDialog(column, value: any) {
+    this.dialog.open(ForeignKeyRefsComponent, {
+      width: '600px',
+      data: { table: this.tableName, column, value, refsTo: this.refsTo, refsFrom: this.refsFrom }
+    });
   }
 
 }
