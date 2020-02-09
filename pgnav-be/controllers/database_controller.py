@@ -13,6 +13,8 @@ connection_request_parser.add_argument('db_name')
 table_query_parser = reqparse.RequestParser()
 table_query_parser.add_argument('filter_column')
 table_query_parser.add_argument('by_value')
+table_query_parser.add_argument('limit')
+table_query_parser.add_argument('offset')
 
 service = None
 no_db = BadRequest("Need to connect to DB first, use /connect")
@@ -43,8 +45,11 @@ class DatabaseTableController(Resource):
     def get(self, table):
         if service:
             args = table_query_parser.parse_args()
-            d = service.select(table, 20, args['filter_column'], args['by_value'])
+            # handle limit & offset
+            limit = if_set_else(args['limit'], 25)
+            offset = if_set_else(args['offset'], 0)
 
+            d = service.select(table, limit, offset, args['filter_column'], args['by_value'])
             row_fields = {}
             if len(d.rows) != 0:
                 row = d.rows[0]
@@ -86,3 +91,8 @@ class DatabaseTableController(Resource):
             return marshal(d, db_fields)
         else:
             raise no_db
+
+
+def if_set_else(obj, default):
+    return obj if obj is not None else default
+

@@ -43,18 +43,18 @@ class DatabaseService:
         tables.sort(key=lambda table: table.name)
         return tables
 
-    def select(self, table_name, limit=25, filter_column=None, filter_value=None):
+    def select(self, table_name, limit, offset, filter_column=None, filter_value=None):
         oid = self.get_table_oid(table_name)
         # Different queries with and without filter
         if filter_column and filter_value:
-            query = sql.SQL("SELECT * FROM {} WHERE {}={} LIMIT %s").format(
+            query = sql.SQL("SELECT * FROM {} WHERE {}={} LIMIT %s OFFSET %s").format(
                 sql.Identifier(table_name),
                 sql.Identifier(filter_column),
                 sql.Placeholder())
-            self.query_executor(self.dict_cursor, query, (filter_value, limit))
+            self.query_executor(self.dict_cursor, query, (filter_value, limit, offset))
         else:
-            query = sql.SQL("SELECT * FROM {} LIMIT %s").format(sql.Identifier(table_name))
-            self.query_executor(self.dict_cursor, query, (limit,))
+            query = sql.SQL("SELECT * FROM {} LIMIT %s OFFSET %s").format(sql.Identifier(table_name))
+            self.query_executor(self.dict_cursor, query, (limit, offset))
         print(self.dict_cursor.query)
 
         # Build columns from cursor description
@@ -134,7 +134,7 @@ class DatabaseService:
         return keys
 
     # Handle cursor execution here to handle exceptions centrally
-    def query_executor(self, cursor, query, params=False):
+    def query_executor(self, cursor, query, params):
         try:
             if not params:
                 cursor.execute(query)
