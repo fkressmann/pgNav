@@ -3,9 +3,11 @@
   <mat-slide-toggle
     #slider
     [matTooltip] ="slider.checked ? 'Toggle the view to table' : 'Toggle the view to cards'"
-    [matTooltipPosition]="'below'"
+    [matTooltipPosition]="'left'"
     aria-label="Button that displays a tooltip in various positions">Card View</mat-slide-toggle>
 </div>
 
-<pgnav-ui-table-view-list *ngIf="!slider.checked" [data]="tableData$ | async" [definitions]="tableDefinitions"></pgnav-ui-table-view-list>
-<pgnav-ui-table-view-cards *ngIf="slider.checked" [data]="tableData$ | async"></pgnav-ui-table-view-cards>
+<ng-container *ngIf="tables$ | async as tables">
+  <pgnav-ui-table-view-list *ngIf="!slider.checked" [data]="tables" [definitions]="tableDefinitions"></pgnav-ui-table-view-list>
+  <pgnav-ui-table-view-cards *ngIf="slider.checked" [data]="tables"></pgnav-ui-table-view-cards>
+</ng-container>

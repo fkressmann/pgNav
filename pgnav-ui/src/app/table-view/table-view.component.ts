@@ -1,3 +1,4 @@
+import { Table } from './../core/table.model';
 import { TableService } from './../core/table.service';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -9,14 +10,13 @@ import { Observable } from 'rxjs';
 })
 export class TableViewComponent implements OnInit {
 
-  tableData$: Observable<any>;
+  tables$: Observable<Table[]>;
   tableDefinitions: string[];
 
   constructor(private tableService: TableService) { }
 
   ngOnInit(): void {
-    this.tableDefinitions = this.tableService.mockTableDefinitions();
-    this.tableData$ = this.tableService.mockTables();
+    this.tableDefinitions = ['name'];
+    this.tables$ = this.tableService.getTables();
   }
-
 }

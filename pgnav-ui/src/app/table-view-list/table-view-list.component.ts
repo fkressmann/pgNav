@@ -1,5 +1,7 @@
-import { MatTableDataSource } from '@angular/material/table';
-import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Table } from './../core/table.model';
+import { MatTableDataSource, MatTable } from '@angular/material/table';
+import { Component, OnInit, Input, ChangeDetectionStrategy, AfterViewInit, ViewChild } from '@angular/core';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'pgnav-ui-table-view-list',
@@ -11,8 +13,9 @@ export class TableViewListComponent implements OnInit {
 
   constructor() { }
 
-  @Input() data: any[];
+  @Input() data: Table[];
   @Input() definitions: string[];
+  @ViewChild(MatSort, {static: true}) sort: MatSort;
 
   dataSource: MatTableDataSource<any>;
   columnsToDisplay: string[];
@@ -22,6 +25,8 @@ export class TableViewListComponent implements OnInit {
     this.dataSource = new MatTableDataSource(this.data);
     this.columnsToDisplay = this.definitions.slice();
     this.displayedColumns = this.definitions.slice();
+
+    this.dataSource.sort = this.sort;
   }
 
   applyFilter($event) {
