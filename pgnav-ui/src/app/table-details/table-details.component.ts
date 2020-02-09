@@ -1,3 +1,4 @@
+import { TableResponse } from './../core/table-response.model';
 import { TableDetailsAddDialogComponent } from './../table-details-add-dialog/table-details-add-dialog.component';
 import { TableService } from './../core/table.service';
 import { takeUntil } from 'rxjs/operators';
@@ -34,18 +35,27 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
     ).subscribe( (params: Params) => {
       this.tableName = params['table'];
 
-      // get the actual data by passing the tableName just retrieved
-      this.tableService.mockTableData(this.tableName).pipe(
+
+      let observable;
+
+      if (this.tableName === 'allocations') {
+        observable = this.tableService.getTableData(this.tableName);
+      } else {
+        // get the actual data by passing the tableName just retrieved
+        observable = this.tableService.mockTableData(this.tableName);
+      }
+
+      observable.pipe(
         takeUntil(this.destroy$)
-      ).subscribe( (response: { data: any[], defs: string[] }) => {
-        this.tableData = new MatTableDataSource(response.data);
-        this.columnsToDisplay = response.defs;
-        this.displayedColumns = response.defs;
+      ).subscribe( (response: TableResponse) => {
+        this.tableData = new MatTableDataSource(response.rows);
+        this.columnsToDisplay = response.columns.map(col => col.name);
+        this.displayedColumns = response.columns.map(col => col.name);
+
+        // activate sorting
+        this.tableData.sort = this.sort;
       });
     });
-
-    // activate sorting
-    this.tableData.sort = this.sort;
   }
 
   ngOnDestroy(): void {
