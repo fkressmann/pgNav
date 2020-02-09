@@ -1,18 +1,6 @@
-.table-card {
-  width: 400px;
-}
-
-.table-card:hover {
-  cursor: pointer;
-}
-
-.table-card:focus {
-  outline: none;
-}
-
-.cards-wrapper {
+.ref-wrapper {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: space-evenly;
 }

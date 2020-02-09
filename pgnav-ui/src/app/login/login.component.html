@@ -1,1 +1,28 @@
-<p>login works!</p>
+<form class="login-form mt-5" (ngSubmit)="submit()">
+  <mat-form-field class="login-full-width">
+    <mat-label>Database user</mat-label>
+    <input matInput [(ngModel)]="formData.db_user" name="user">
+  </mat-form-field>
+
+  <mat-form-field class="login-full-width">
+    <mat-label>Database password</mat-label>
+    <input matInput [(ngModel)]="formData.db_pass" name="password" type="password">
+  </mat-form-field>
+
+  <mat-form-field class="login-full-width">
+    <mat-label>Database host</mat-label>
+    <input matInput [(ngModel)]="formData.db_host" name="host">
+  </mat-form-field>
+
+  <mat-form-field class="login-full-width">
+    <mat-label>Database port</mat-label>
+    <input matInput [(ngModel)]="formData.db_port" name="port">
+  </mat-form-field>
+
+  <mat-form-field class="login-full-width">
+    <mat-label>Database name</mat-label>
+    <input matInput [(ngModel)]="formData.db_name" name="database">
+  </mat-form-field>
+
+  <button type="submit" mat-button>Submit</button>
+</form>

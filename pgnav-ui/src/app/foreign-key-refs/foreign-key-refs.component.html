@@ -1,9 +1,10 @@
 <ng-container>
   <h2>{{ data.table }}.{{ data.column }} is referenced by</h2>
-  <ng-container *ngFor="let ref of data.refsFrom">
+  <ng-container *ngFor="let ref of data.refsFrom" class="ref-wrapper">
     <button
       class="d-block my-2"
       mat-button
+      class="ref"
       (click)="close()"
       [routerLink]="['/', ref.table]"
       [queryParams]="{filter_column: ref.column, by_value: data.value}"
