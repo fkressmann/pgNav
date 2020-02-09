@@ -66,6 +66,7 @@ class DatabaseTableController(Resource):
 
         col_fields = {
             'name': fields.String,
+            'type': fields.String,
             'ref_from': fields.List(fields.Nested(ref_fields)),
             'ref_to': fields.List(fields.Nested(ref_fields))
         }
