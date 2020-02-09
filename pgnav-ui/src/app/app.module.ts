@@ -12,6 +12,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { TableDetailsAddDialogComponent } from './table-details-add-dialog/table-details-add-dialog.component';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { ForeignKeyRefsComponent } from './foreign-key-refs/foreign-key-refs.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { HttpClientModule } from '@angular/common/http';
     TableViewCardsComponent,
     TableViewComponent,
     TableDetailsComponent,
-    TableDetailsAddDialogComponent
+    TableDetailsAddDialogComponent,
+    ForeignKeyRefsComponent
   ],
   imports: [
     BrowserModule,

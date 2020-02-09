@@ -27,6 +27,8 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
   tableData: MatTableDataSource<any>;
   columnsToDisplay: string[];
   displayedColumns: string[];
+  refsTo: any[];
+  refsFrom: any[];
 
   ngOnInit(): void {
     // take the tableName from the route
@@ -51,6 +53,9 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
         this.tableData = new MatTableDataSource(response.rows);
         this.columnsToDisplay = response.columns.map(col => col.name);
         this.displayedColumns = response.columns.map(col => col.name);
+
+        this.refsTo = response.refsTo;
+        this.refsFrom = response.refsFrom;
 
         // activate sorting
         this.tableData.sort = this.sort;
