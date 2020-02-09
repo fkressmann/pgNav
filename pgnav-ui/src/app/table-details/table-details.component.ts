@@ -122,9 +122,10 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
   openViewRefsDialog(column, value: any) {
     const element = this.columns.find(col => col.name === column);
     const refsFrom = element.ref_from;
+    const refsTo = element.ref_to;
     this.dialog.open(ForeignKeyRefsComponent, {
       width: '1000px',
-      data: { table: this.tableName, column, value, refsFrom }
+      data: { table: this.tableName, column, value, refsFrom, refsTo }
     });
   }
 

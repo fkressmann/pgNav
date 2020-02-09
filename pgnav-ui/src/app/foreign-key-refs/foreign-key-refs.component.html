@@ -1,5 +1,5 @@
 <ng-container>
-  <h2>Columns referencing {{ data.table }}.{{ data.column }}</h2>
+  <h2>{{ data.table }}.{{ data.column }} is referenced by</h2>
   <ng-container *ngFor="let ref of data.refsFrom">
     <button
       class="d-block my-2"
