@@ -8,6 +8,7 @@ class Column(BaseModel):
         self.ref_to = []
         self.ref_from = []
         self.type = None
+        self.is_primary = False
 
     def add_ref_from(self, ref):
         self.ref_from.append(ref)
@@ -17,3 +18,6 @@ class Column(BaseModel):
 
     def set_type(self, type):
         self.type = type
+
+    def set_primary(self):
+        self.is_primary = True
