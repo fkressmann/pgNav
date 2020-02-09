@@ -5,7 +5,8 @@ import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { Subject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { MatTable } from '@angular/material/table';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'pgnav-ui-table-details',
@@ -15,30 +16,36 @@ import { MatTable } from '@angular/material/table';
 export class TableDetailsComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatTable) table: MatTable<any>;
+  @ViewChild(MatSort, {static: true}) sort: MatSort;
 
   constructor(private route: ActivatedRoute, private tableService: TableService, private dialog: MatDialog) { }
 
   tableName: string;
   destroy$: Subject<boolean> = new Subject();
 
-  data: any[];
+  tableData: MatTableDataSource<any>;
   columnsToDisplay: string[];
   displayedColumns: string[];
 
   ngOnInit(): void {
+    // take the tableName from the route
     this.route.params.pipe(
       takeUntil(this.destroy$)
     ).subscribe( (params: Params) => {
       this.tableName = params['table'];
 
+      // get the actual data by passing the tableName just retrieved
       this.tableService.mockTableData(this.tableName).pipe(
         takeUntil(this.destroy$)
       ).subscribe( (response: { data: any[], defs: string[] }) => {
-        this.data = response.data;
+        this.tableData = new MatTableDataSource(response.data);
         this.columnsToDisplay = response.defs;
         this.displayedColumns = response.defs;
       });
     });
+
+    // activate sorting
+    this.tableData.sort = this.sort;
   }
 
   ngOnDestroy(): void {
@@ -56,8 +63,9 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
     });
 
     dialogReference.afterClosed().subscribe(result => {
-      result.id = this.data.length + 1;
-      this.data.push(result);
+      // MatTableDataSource stores the actual data in the data property
+      result.id = this.tableData.data.length + 1;
+      this.tableData.data.push(result);
       this.table.renderRows();
     });
   }

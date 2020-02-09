@@ -17,4 +17,8 @@ export class TableDetailsAddDialogComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  close() {
+    this.dialogRef.close();
+  }
+
 }
