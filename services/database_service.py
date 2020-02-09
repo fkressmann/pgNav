@@ -41,10 +41,10 @@ class DatabaseService:
         tables = [Table(name[0]) for name in result]
         return tables
 
-    def select(self, table, limit=25):
-        oid = self.get_table_oid(table)
+    def select(self, table_name, limit=25):
+        oid = self.get_table_oid(table_name)
 
-        query = sql.SQL("SELECT * FROM {} LIMIT %s").format(sql.Identifier(table))
+        query = sql.SQL("SELECT * FROM {} LIMIT %s").format(sql.Identifier(table_name))
         self.dict_cursor.execute(query, (limit,))
         ddl = self.dict_cursor.description
         columns = [Column(c) for c in ddl]
@@ -57,7 +57,7 @@ class DatabaseService:
             f = filter(lambda column: column.name == ref.source_col, columns)
             next(f).add_ref_from(ref)
 
-        return Table(0, table, columns, data)
+        return Table(table_name, oid, columns, data)
 
     def get_table_oid(self, table):
         query = "select oid from pg_catalog.pg_class where relname OPERATOR(pg_catalog.~) %s;"
