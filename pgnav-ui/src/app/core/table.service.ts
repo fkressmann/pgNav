@@ -1,14 +1,23 @@
+import { TableResponse } from './table-response.model';
 import { Table } from './table.model';
 import { Person } from './person.model';
 import { Injectable } from '@angular/core';
 import { of, Observable, Subject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+
+const apiRoot: string = 'http://localhost:5000/api';
+const testDB: string = 'plf_main_test';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TableService {
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
+
+  getTableData(tableName: string): Observable<TableResponse> {
+    return this.http.get<TableResponse>(`${apiRoot}/db/${testDB}/table/${tableName}`);
+  }
 
   mockTables(): Observable<Table[]> {
     const tables: Table[] = [
@@ -18,6 +27,7 @@ export class TableService {
       { id: 4, name: 'incidents', entries: 1301 },
       { id: 5, name: 'feedback', entries: 107 },
       { id: 6, name: 'contacts', entries: 213 },
+      { id: 7, name: 'allocations', entries: 5 },
     ];
     return of(tables);
   }
@@ -26,7 +36,7 @@ export class TableService {
     return ['id', 'name', 'entries'];
   }
 
-  mockTableData(tableName: string): Observable<any> {
+  mockTableData(tableName: string): Observable<TableResponse> {
     const customers: Person[] = [
       { id: 1, firstname: 'Hans', lastname: 'Wurst', sex: 'male', age: 18 },
       { id: 2, firstname: 'Clara', lastname: 'Kant', sex: 'female', age: 25 },
@@ -46,9 +56,27 @@ export class TableService {
     ];
 
     const mappings = {
-      customers: { data: customers, defs: ['id', 'firstname', 'lastname', 'sex', 'age']},
-      products: { data: products, defs: ['id', 'name', 'model', 'make'] },
-      clients: { data: clients, defs: ['id', 'name'] }
+      customers: {
+        rows: customers,
+        columns: [
+          { name: 'id'}, { name: 'firstname'}, { name: 'lastname'}, { name: 'sex' }, { name: 'age' }
+        ],
+        name: 'customers'
+      },
+      products: {
+        rows: products,
+        columns: [
+          { name: 'id' }, { name: 'name' }, { name: 'model' }, { name: 'make'}
+        ],
+        name: 'products'
+      },
+      clients: {
+        rows: clients,
+        columns: [
+          { name: 'id' }, { name: 'name' }
+        ],
+        name: 'clients'
+      }
     };
 
     return of(mappings[tableName]);
