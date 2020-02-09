@@ -16,7 +16,11 @@ export class TableService {
   constructor(private http: HttpClient) {}
 
   getTableData(tableName: string): Observable<TableResponse> {
-    return this.http.get<TableResponse>(`${apiRoot}/db/${testDB}/table/${tableName}`);
+    return this.http.get<TableResponse>(`${apiRoot}/table/${tableName}`);
+  }
+
+  getTables(): Observable<Table[]> {
+    return this.http.get<Table[]>(`${apiRoot}/tables`);
   }
 
   mockTables(): Observable<Table[]> {
@@ -27,10 +31,6 @@ export class TableService {
       { name: 'allocations' }
     ];
     return of(tables);
-  }
-
-  mockTableDefinitions() {
-    return ['name'];
   }
 
   mockTableData(tableName: string): Observable<TableResponse> {
