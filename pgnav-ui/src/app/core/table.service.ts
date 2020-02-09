@@ -13,8 +13,12 @@ export class TableService {
 
   constructor(private http: HttpClient) {}
 
-  getTableData(tableName: string): Observable<TableMeta> {
-    return this.http.get<TableMeta>(`${apiRoot}/table/${tableName}`);
+  getTableData(tableName: string, filterColumn?: string, filterValue?: string): Observable<TableMeta> {
+    if (filterColumn && filterValue) {
+      return this.http.get<TableMeta>(`${apiRoot}/table/${tableName}?filter_column=${filterColumn}&by_value=${filterValue}`);
+    } else {
+      return this.http.get<TableMeta>(`${apiRoot}/table/${tableName}`);
+    }
   }
 
   getTables(): Observable<Table[]> {

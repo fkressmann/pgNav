@@ -6,7 +6,7 @@
       mat-button
       (click)="close()"
       [routerLink]="['/', ref.table]"
-      [queryParams]="{filter_column: data.column, by_value: data.value}"
+      [queryParams]="{filter_column: ref.column, by_value: data.value}"
     >
     {{ ref.table  + '.' + ref.column }}
   </button>
@@ -21,7 +21,7 @@
       mat-button
       (click)="close()"
       [routerLink]="['/', ref.table]"
-      [queryParams]="{filter_column: data.column, by_value: data.value}"
+      [queryParams]="{filter_column: ref.column, by_value: data.value}"
     >
     {{ ref.table  + '.' + ref.column }}
   </button>
