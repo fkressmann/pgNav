@@ -1,20 +1,25 @@
 <mat-form-field>
   <mat-label>Filter</mat-label>
-  <input matInput (keyup)="applyFilter($event)" placeholder="Type to search">
+  <input matInput placeholder="Type to search">
 </mat-form-field>
 
-<table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
-  <ng-container [matColumnDef]="column" *ngFor="let column of displayedColumns">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ column }}</th>
-    <td mat-cell *matCellDef="let element"> {{ element[column] }}</td>
-  </ng-container>
-
-  <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
-  <tr mat-row
-      *matRowDef="let table; columns: columnsToDisplay"
-      [routerLink]="table.name"
-      class="table-row"
-      [matTooltip] ="'See details of ' + table.name"
-      [matTooltipPosition]="'left'"
-      aria-label="Button that displays a tooltip in various positions"></tr>
-</table>
+<div class="table-responsive">
+  <table class="table table-full-width">
+    <thead>
+      <tr>
+        <th scope="col" *ngFor="let column of columnsToDisplay">{{ column | titlecase }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let table of tables">
+        <tr>
+          <td
+            *ngFor="let property of table | propertiesArray"
+            [routerLink]="table['name']"
+            class="table-row"
+          >{{ property.value }}</td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+</div>

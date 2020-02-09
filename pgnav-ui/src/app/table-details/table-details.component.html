@@ -1,6 +1,6 @@
 <mat-form-field class="mt-5">
   <mat-label>Filter</mat-label>
-  <input matInput (keyup)="applyFilter($event)" placeholder="Type to search">
+  <input matInput placeholder="Type to search">
 </mat-form-field>
 
 <mat-toolbar color="primary" >
@@ -28,27 +28,26 @@
   </mat-toolbar-row>
 </mat-toolbar>
 
-<table #table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
-  <ng-container [matColumnDef]="column" *ngFor="let column of displayedColumns">
-    <th
-      mat-header-cell
-      *matHeaderCellDef
-      mat-sort-header>{{ column }}
-    </th>
-    <td
-      [class]="getTableCellClass(column)"
-      mat-cell
-      *matCellDef="let element"
-      (click)="hasRefs(column) && openViewRefsDialog(column, element[column])"
-    >
-      {{ element[column] }}
-    </td>
-  </ng-container>
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col" *ngFor="let column of columnsToDisplay">
+          <mat-icon *ngIf="isPrimary(column)" matBadge="PK" matBadgeSize="small" matBadgeColor="warn" matBadgePosition="above after"></mat-icon>
+          <span>{{ column | titlecase }}</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let entity of data">
+        <tr>
+          <td
+            *ngFor="let property of entity | propertiesArray"
+            (click)="openViewRefsDialog(property.key, property.value)"
+            [class]="getTableCellClass(property.key)">{{ property.value }}</td>
+        </tr>
+      </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></tr>
-  <tr
-    mat-row
-    *matRowDef="let row; columns: columnsToDisplay"
-    class="table-row"
-  ></tr>
-</table>
+    </tbody>
+  </table>
+</div>
