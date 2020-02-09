@@ -21,23 +21,20 @@ export class TableService {
 
   mockTables(): Observable<Table[]> {
     const tables: Table[] = [
-      { id: 1, name: 'customers', entries: 1024 },
-      { id: 2, name: 'products', entries: 15726 },
-      { id: 3, name: 'clients', entries: 57 },
-      { id: 4, name: 'incidents', entries: 1301 },
-      { id: 5, name: 'feedback', entries: 107 },
-      { id: 6, name: 'contacts', entries: 213 },
-      { id: 7, name: 'allocations', entries: 5 },
+      { name: 'producers' },
+      { name: 'sites' },
+      { name: 'rooms' },
+      { name: 'allocations' }
     ];
     return of(tables);
   }
 
   mockTableDefinitions() {
-    return ['id', 'name', 'entries'];
+    return ['name'];
   }
 
   mockTableData(tableName: string): Observable<TableResponse> {
-    const customers: TableResponse = {
+    const producers: TableResponse = {
       rows: [
         { id: 1, firstname: 'Hans', lastname: 'Wurst', sex: 'male', age: 18 },
         { id: 2, firstname: 'Clara', lastname: 'Kant', sex: 'female', age: 25 },
@@ -48,16 +45,16 @@ export class TableService {
       ],
       name: 'customers',
       refsTo: [
-        { table: 'products' },
-        { table: 'clients' },
+        { table: 'rooms', column: 'id' },
+        { table: 'sites', column: 'client_id' },
       ],
       refsFrom: [
-        { table: 'clients' },
-        { table: 'products' }
+        { table: 'producers', column: 'id' },
+        { table: 'allocations', column: 'prod_id' }
       ]
     };
 
-    const products: TableResponse = {
+    const sites: TableResponse = {
       rows: [
         { id: 1, name: 'Dicer', model: '2000', make: 'Nicer' },
         { id: 2, name: 'VW Polo', model: 'Polo', make: 'VW' },
@@ -71,7 +68,7 @@ export class TableService {
       refsFrom: []
     };
 
-    const clients: TableResponse = {
+    const rooms: TableResponse = {
       rows: [
         { id: 1, name: 'Allocato GmbH' },
         { id: 2, name: 'Syraro AG' },
@@ -82,15 +79,32 @@ export class TableService {
       ],
       name: 'clients',
       refsTo: [
-        { table: 'products' }
+        { table: 'allocations', column: 'prod_id' }
+      ],
+      refsFrom: []
+    };
+
+    const allocations: TableResponse = {
+      rows: [
+        { id: 1, name: 'Hausbuettel 3' },
+        { id: 2, name: 'Haus Nikoluas 4' },
+        { id: 3, name: 'Holzhüttle' },
+      ],
+      columns: [
+        { name: 'id' }, { name: 'name' }
+      ],
+      name: 'clients',
+      refsTo: [
+        { table: 'rooms', column: 'prod_id' }
       ],
       refsFrom: []
     };
 
     const mappings = {
-      customers,
-      products,
-      clients
+      producers,
+      sites,
+      rooms,
+      allocations
     };
 
     return of(mappings[tableName]);

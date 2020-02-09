@@ -1,5 +1,6 @@
-import { Table } from './../core/table.model';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { DialogData } from './dialog-data.model';
 
 @Component({
   selector: 'pgnav-ui-foreign-key-refs',
@@ -8,13 +9,15 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class ForeignKeyRefsComponent implements OnInit {
 
-  @Input() refsFrom: any[];
-  @Input() refsTo: any[];
-  @Input() currentTable: string;
-
-  constructor() { }
+  constructor(
+    public dialogRef: MatDialogRef<ForeignKeyRefsComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: DialogData ) {}
 
   ngOnInit(): void {
+  }
+
+  close() {
+    this.dialogRef.close();
   }
 
 }

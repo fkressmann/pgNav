@@ -13,3 +13,15 @@ mat-icon:hover {
 mat-icon:focus {
   outline: none;
 }
+
+.table-cell {
+  text-decoration: underline;
+}
+
+.table-cell:hover {
+  cursor: pointer;
+}
+
+.table-cell:focus {
+  outline: none;
+}
