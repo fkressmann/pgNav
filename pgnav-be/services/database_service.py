@@ -34,8 +34,13 @@ class DatabaseService:
                                     port=self.port,
                                     database=self.database)
 
-        except (Exception, psycopg2.Error) as error:
-            print("Error while connecting to PostgreSQL", error)
+        except Exception as error:
+            print(error)
+            raise InternalServerError(str(error))
+
+    def disconnect(self):
+        self.connection.close()
+        print("Old connection closed successfully")
 
     def init_database(self):
         self.tables = self.get_all_tables()
