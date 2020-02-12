@@ -67,8 +67,6 @@ export class TableDetailsComponent implements OnInit, OnDestroy {
           this.data = response.rows;
           this.columns = response.columns;
           this.columnsToDisplay = response.columns.map(col => col.name);
-
-          console.table(this.columnsToDisplay)
         });
       }
     });

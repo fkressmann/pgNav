@@ -1,3 +1,4 @@
+import { TableSearchModule } from './table-search/table-search.module';
 import { AngularMaterialModule } from './angular-material.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -36,7 +37,8 @@ import { PropertiesArrayPipe } from './table-details/properties-array.pipe';
     AngularMaterialModule, // collects all required angular material modules
     AppRoutingModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    TableSearchModule
   ],
   providers: [
   ],

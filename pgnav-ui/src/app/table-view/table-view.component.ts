@@ -18,5 +18,6 @@ export class TableViewComponent implements OnInit {
   ngOnInit(): void {
     this.tableDefinitions = ['name'];
     this.tables$ = this.tableService.getTables();
+    // this.tables$ = this.tableService.getMockTables();
   }
 }

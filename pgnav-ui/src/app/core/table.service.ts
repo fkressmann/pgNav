@@ -1,6 +1,6 @@
 import { Table } from './table.model';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { TableDetailsModel } from './table-details.model';
 
@@ -23,5 +23,19 @@ export class TableService {
 
   getTables(): Observable<Table[]> {
     return this.http.get<Table[]>(`${apiRoot}/tables`);
+  }
+
+  getMockTables(): Observable<Table[]> {
+    const tables: Table[] = [
+      { name: 'test' },
+      { name: 'passengers' },
+      { name: 'customers' },
+      { name: 'locations' },
+      { name: 'services' },
+      { name: 'animals' },
+      { name: 'drinks' },
+    ];
+
+    return of(tables);
   }
 }
