@@ -27,6 +27,9 @@ table_name_fields = {
 class DatabaseConnectController(Resource):
     def post(self):
         global service
+        # Close old connection if existing
+        if service:
+            service.disconnect()
         args = connection_request_parser.parse_args()
         service = DatabaseService(args['db_host'], args['db_port'], args['db_user'], args['db_pass'], args['db_name'])
         return {"message": "Connection created successfully :)"}, 201
