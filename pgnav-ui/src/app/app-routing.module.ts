@@ -6,9 +6,9 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
-  { path: '', component: TableViewComponent, },
+  { path: '', component: TableViewComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
-  { path: ':table', component: TableDetailsComponent, },
+  { path: ':table', component: TableDetailsComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '', pathMatch: 'full' },
 ];
 

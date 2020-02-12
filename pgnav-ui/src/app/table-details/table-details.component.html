@@ -1,7 +1,4 @@
-<mat-form-field class="mt-5">
-  <mat-label>Filter</mat-label>
-  <input matInput placeholder="Type to search">
-</mat-form-field>
+<pgnav-ui-table-search #search></pgnav-ui-table-search>
 
 <mat-toolbar color="primary" >
   <mat-toolbar-row>
@@ -39,7 +36,7 @@
       </tr>
     </thead>
     <tbody>
-      <ng-container *ngFor="let entity of data">
+      <ng-container *ngFor="let entity of data | tablesearch:search.value">
         <tr>
           <td
             *ngFor="let property of entity | propertiesArray"

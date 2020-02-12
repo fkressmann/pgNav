@@ -1,4 +1,4 @@
-<div class="mb-2">
+<div>
   <h2>Tables overview</h2>
   <mat-slide-toggle
     #slider
@@ -7,7 +7,9 @@
     aria-label="Button that displays a tooltip in various positions">Card View</mat-slide-toggle>
 </div>
 
-<ng-container *ngIf="tables$ | async as tables">
+<pgnav-ui-table-search #search></pgnav-ui-table-search>
+
+<ng-container *ngIf="tables$ | async | tablesearch:search.value as tables">
   <pgnav-ui-table-view-list *ngIf="!slider.checked" [tables]="tables" [definitions]="tableDefinitions"></pgnav-ui-table-view-list>
   <pgnav-ui-table-view-cards *ngIf="slider.checked" [tables]="tables"></pgnav-ui-table-view-cards>
 </ng-container>
