@@ -14,7 +14,7 @@ class Table(BaseModel):
         self.columns = columns
 
     def set_rows(self, rows):
-        self.rows.extend(rows)
+        self.rows = rows
 
     def __str__(self):
         return "Table: " + self.name
