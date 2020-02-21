@@ -3,12 +3,12 @@ from models.base import BaseModel
 
 class Column(BaseModel):
 
-    def __init__(self, pg_column):
-        self.name = pg_column.name
+    def __init__(self, name, dtype=None, is_primary=False):
+        self.name = name
         self.ref_to = []
         self.ref_from = []
-        self.type = None
-        self.is_primary = False
+        self.type = dtype
+        self.is_primary = True if is_primary else False  # Dont allow None here
 
     def add_ref_from(self, ref):
         self.ref_from.append(ref)
@@ -21,3 +21,9 @@ class Column(BaseModel):
 
     def set_primary(self):
         self.is_primary = True
+
+    def get_name(self):
+        return self.name
+
+    def __str__(self):
+        return "Column: " + self.name

@@ -6,6 +6,7 @@ from werkzeug.exceptions import BadRequest, InternalServerError
 from models.table import Table
 from models.column import Column
 from models.refs import Reference
+from functools import reduce
 
 # Parse shit like 'FOREIGN KEY (allocation_id) REFERENCES allocations(id)'
 parser = re.compile("FOREIGN KEY \\(([\\w_]*)\\) REFERENCES ([\\w_]*)\\(([\\w_]*)\\)")
@@ -22,6 +23,8 @@ class DatabaseService:
         self.connection = self.connect()
         self.cursor = self.connection.cursor()
         self.dict_cursor = self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        self.tables = self.get_all_tables()
+        print("Got {} tables in database {}".format(len(self.tables), self.database))
 
     def connect(self):
         try:
@@ -31,79 +34,47 @@ class DatabaseService:
                                     port=self.port,
                                     database=self.database)
 
-        except (Exception, psycopg2.Error) as error:
-            print("Error while connecting to PostgreSQL", error)
+        except Exception as error:
+            print(error)
+            raise InternalServerError(str(error))
+
+    def disconnect(self):
+        self.connection.close()
+        print("Old connection closed successfully")
+
+    def init_database(self):
+        self.tables = self.get_all_tables()
+        print(len(self.tables))
+        list(map(self.describe_table, self.tables))
+        list(map(self.get_ref_from, self.tables))
+        list(map(self.get_ref_to, self.tables))
 
     def get_all_tables(self):
-        query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
-        self.cursor.execute(query)
+        query = "SELECT table_name as name, table_name::regclass::oid as oid FROM information_schema.tables WHERE table_schema = 'public';"
+        self.query_executor(self.cursor, query, None)
         result = self.cursor.fetchall()
         # Create strings from one-element-tuples
-        tables = [Table(name[0]) for name in result]
+        tables = [Table(name, oid) for name, oid in result]
         tables.sort(key=lambda table: table.name)
         return tables
 
-    def select(self, table_name, limit=25, filter_column=None, filter_value=None):
-        oid = self.get_table_oid(table_name)
-        # Different queries with and without filter
-        if filter_column and filter_value:
-            query = sql.SQL("SELECT * FROM {} WHERE {}={} LIMIT %s").format(
-                sql.Identifier(table_name),
-                sql.Identifier(filter_column),
-                sql.Placeholder())
-            self.query_executor(self.dict_cursor, query, (filter_value, limit))
-        else:
-            query = sql.SQL("SELECT * FROM {} LIMIT %s").format(sql.Identifier(table_name))
-            self.query_executor(self.dict_cursor, query, (limit,))
-        print(self.dict_cursor.query)
-
-        # Build columns from cursor description
-        ddl = self.dict_cursor.description
-        columns = [Column(c) for c in ddl]
-        data = self.dict_cursor.fetchall()
-
-        # Set column types from data if existing (not if 0 rows received)
-        if len(data) != 0:
-            for k, v in data[0].items():
-                f = filter(lambda column: column.name == k, columns)
-                next(f).set_type(type(v).__name__)
-
-        # Get tables referencing this one and add then to the corresponding column
-        refs_from = self.get_ref_from(oid)
-        for ref in refs_from:
-            f = filter(lambda column: column.name == ref.source_col, columns)
-            next(f).add_ref_from(ref)
-
-        # Get tables referenced by this one and ...
-        refs_to = self.get_ref_to(oid)
-        for ref in refs_to:
-            f = filter(lambda column: column.name == ref.source_col, columns)
-            next(f).add_ref_to(ref)
-
-        # Get primary attributes
-        pk_s = self.get_primary_keys(oid)
-        for pk in pk_s:
-            f = filter(lambda column: column.name == pk, columns)
-            next(f).set_primary()
-
-        return Table(table_name, oid, columns, data)
-
-    def get_table_oid(self, table):
-        query = "select oid from pg_catalog.pg_class where relname OPERATOR(pg_catalog.~) %s;"
-        q_table = "^(" + table + ")$"
-        self.query_executor(self.cursor, query, (q_table,))
-        print(self.cursor.query)
+    def describe_table(self, table):
+        query = """SELECT DISTINCT a.attname, pg_catalog.format_type(a.atttypid, a.atttypmod), i.indisprimary, a.attnum
+                    FROM pg_catalog.pg_attribute a LEFT JOIN pg_index i ON a.attrelid = i.indrelid AND a.attnum =ANY(i.indkey)
+                    WHERE a.attrelid = %s AND a.attnum > 0 AND NOT a.attisdropped ORDER BY a.attnum;"""
+        self.query_executor(self.cursor, query, (table.oid,))
         result = self.cursor.fetchall()
-        if len(result) != 0:
-            return result[0]
-        else:
-            raise BadRequest("Table '{}' does not exist".format(table))
+        columns = [Column(name, dtype=dtype, is_primary=primary) for name, dtype, primary, attnum in result]
+        table.set_columns(columns)
+        self.get_ref_from(table)
+        self.get_ref_to(table)
+        table.fetched = True
 
-    def get_ref_from(self, oid):
+
+    def get_ref_from(self, table):
         query = "SELECT conrelid::pg_catalog.regclass, pg_catalog.pg_get_constraintdef(c.oid, true) as condef FROM " \
                 "pg_catalog.pg_constraint c WHERE c.confrelid = %s AND c.contype = 'f' ORDER BY 1; "
-        self.query_executor(self.cursor, query, (oid,))
-        print(self.cursor.query)
+        self.query_executor(self.cursor, query, (table.oid,))
         refs = self.cursor.fetchall()
         d_refs = []
         for ref in refs:
@@ -111,30 +82,52 @@ class DatabaseService:
             foreign_col = regex.group(1)
             d_refs.append(Reference(regex.group(3), ref[0], foreign_col))
         d_refs.sort(key=lambda ref: ref.table)
-        return d_refs
+        for ref in d_refs:
+            f = filter(lambda column: column.name == ref.source_col, table.columns)
+            next(f).add_ref_from(ref)
 
-    def get_ref_to(self, oid):
+    def get_ref_to(self, table):
         query = "SELECT pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE " \
                 "r.conrelid = %s AND r.contype = 'f' ORDER BY 1; "
-        self.query_executor(self.cursor, query, (oid,))
+        self.query_executor(self.cursor, query, (table.oid,))
         refs = self.cursor.fetchall()
         d_refs = []
         for ref in refs:
             regex = parser.search(ref[0])
             d_refs.append(Reference(regex.group(1), regex.group(2), regex.group(3)))
         d_refs.sort(key=lambda ref: ref.table)
-        return d_refs
+        for ref in d_refs:
+            f = filter(lambda column: column.name == ref.source_col, table.columns)
+            next(f).add_ref_to(ref)
 
-    def get_primary_keys(self, oid):
-        query = "SELECT attname FROM pg_index i JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(" \
-                "i.indkey) WHERE  i.indrelid = %s AND i.indisprimary; "
-        self.query_executor(self.cursor, query, (oid,))
-        result = self.cursor.fetchall()
-        keys = [k for k in result[0]]
-        return keys
+    def select(self, table_name, limit, offset, filter_column=None, filter_value=None):
+        table = next(filter(lambda table: table.name == table_name, self.tables))
+        if not table.fetched:
+            print("Fetching definition for table {}".format(table.name))
+            self.describe_table(table)
+
+        # Different queries with and without filter
+        if filter_column and filter_value:
+            # Protect DB from bad FE queries
+            if filter_column not in table.get_column_names():
+                raise BadRequest("Column {} not existing in target table {}".format(filter_column, table.name))
+
+            query = sql.SQL("SELECT * FROM {} WHERE {}={} LIMIT %s OFFSET %s").format(
+                sql.Identifier(table_name),
+                sql.Identifier(filter_column),
+                sql.Placeholder())
+            self.query_executor(self.dict_cursor, query, (filter_value, limit, offset))
+        else:
+            query = sql.SQL("SELECT * FROM {} LIMIT %s OFFSET %s").format(sql.Identifier(table_name))
+            self.query_executor(self.dict_cursor, query, (limit, offset))
+
+        data = self.dict_cursor.fetchall()
+        table.set_rows(data)
+        return table
+
 
     # Handle cursor execution here to handle exceptions centrally
-    def query_executor(self, cursor, query, params=False):
+    def query_executor(self, cursor, query, params):
         try:
             if not params:
                 cursor.execute(query)

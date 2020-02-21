@@ -13,6 +13,8 @@ connection_request_parser.add_argument('db_name')
 table_query_parser = reqparse.RequestParser()
 table_query_parser.add_argument('filter_column')
 table_query_parser.add_argument('by_value')
+table_query_parser.add_argument('limit')
+table_query_parser.add_argument('offset')
 
 service = None
 no_db = BadRequest("Need to connect to DB first, use /connect")
@@ -25,6 +27,9 @@ table_name_fields = {
 class DatabaseConnectController(Resource):
     def post(self):
         global service
+        # Close old connection if existing
+        if service:
+            service.disconnect()
         args = connection_request_parser.parse_args()
         service = DatabaseService(args['db_host'], args['db_port'], args['db_user'], args['db_pass'], args['db_name'])
         return {"message": "Connection created successfully :)"}, 201
@@ -34,17 +39,20 @@ class DatabaseTablesController(Resource):
     @marshal_with(table_name_fields)
     def get(self):
         if service:
-            return service.get_all_tables()
+            return service.tables
         else:
             raise no_db
 
 
 class DatabaseTableController(Resource):
-    def get(self, table):
+    def get(self, table):  # ToDo: refactor table to table_name, needs FE!
         if service:
             args = table_query_parser.parse_args()
-            d = service.select(table, 20, args['filter_column'], args['by_value'])
+            # handle limit & offset
+            limit = if_set_else(args['limit'], 25)
+            offset = if_set_else(args['offset'], 0)
 
+            d = service.select(table, limit, offset, args['filter_column'], args['by_value'])
             row_fields = {}
             if len(d.rows) != 0:
                 row = d.rows[0]
@@ -86,3 +94,8 @@ class DatabaseTableController(Resource):
             return marshal(d, db_fields)
         else:
             raise no_db
+
+
+def if_set_else(obj, default):
+    return obj if obj is not None else default
+
