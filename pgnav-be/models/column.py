@@ -22,5 +22,8 @@ class Column(BaseModel):
     def set_primary(self):
         self.is_primary = True
 
+    def get_name(self):
+        return self.name
+
     def __str__(self):
         return "Column: " + self.name

@@ -23,8 +23,8 @@ class DatabaseService:
         self.connection = self.connect()
         self.cursor = self.connection.cursor()
         self.dict_cursor = self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        self.tables = []
-        self.init_database()
+        self.tables = self.get_all_tables()
+        print("Got {} tables in database {}".format(len(self.tables), self.database))
 
     def connect(self):
         try:
@@ -66,6 +66,9 @@ class DatabaseService:
         result = self.cursor.fetchall()
         columns = [Column(name, dtype=dtype, is_primary=primary) for name, dtype, primary, attnum in result]
         table.set_columns(columns)
+        self.get_ref_from(table)
+        self.get_ref_to(table)
+        table.fetched = True
 
 
     def get_ref_from(self, table):
@@ -99,23 +102,24 @@ class DatabaseService:
 
     def select(self, table_name, limit, offset, filter_column=None, filter_value=None):
         table = next(filter(lambda table: table.name == table_name, self.tables))
+        if not table.fetched:
+            print("Fetching definition for table {}".format(table.name))
+            self.describe_table(table)
 
         # Different queries with and without filter
         if filter_column and filter_value:
+            # Protect DB from bad FE queries
+            if filter_column not in table.get_column_names():
+                raise BadRequest("Column {} not existing in target table {}".format(filter_column, table.name))
+
             query = sql.SQL("SELECT * FROM {} WHERE {}={} LIMIT %s OFFSET %s").format(
                 sql.Identifier(table_name),
                 sql.Identifier(filter_column),
                 sql.Placeholder())
             self.query_executor(self.dict_cursor, query, (filter_value, limit, offset))
         else:
-            if table.all_rows_loaded or len(table.rows) == 25:
-                print("All Data loaded, serving table {} from cache".format(table.name))
-                return table
             query = sql.SQL("SELECT * FROM {} LIMIT %s OFFSET %s").format(sql.Identifier(table_name))
             self.query_executor(self.dict_cursor, query, (limit, offset))
-
-            if self.cursor.rowcount < limit:
-                table.all_rows_loaded = True
 
         data = self.dict_cursor.fetchall()
         table.set_rows(data)
