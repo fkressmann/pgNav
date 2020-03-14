@@ -4,7 +4,7 @@ import configparser
 class ConnectionService:
     def __init__(self):
         self.config = configparser.ConfigParser()
-        self.config.read(['../connections.ini', '../connections.ini.private'])
+        self.config.read(['../connections.ini.private', '../connections.ini'])
 
     def get_connections(self):
         print(self.config.sections())
