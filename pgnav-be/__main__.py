@@ -3,12 +3,14 @@ from flask_restful import Api
 from flask_cors import CORS
 import webbrowser
 from threading import Timer
+# from werkzeug.middleware.profiler import ProfilerMiddleware
 
 from controllers.database_controller import DatabaseTableController, DatabaseConnectController, DatabaseTablesController
 
 app = Flask(__name__, static_url_path='')
 CORS(app)
 api = Api(app)
+# app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
 
 prefix = "/api"
 api.add_resource(DatabaseTableController, prefix + '/table/<string:table>')
