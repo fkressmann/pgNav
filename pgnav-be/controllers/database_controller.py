@@ -1,9 +1,12 @@
 from flask_restful import Resource, fields, marshal_with, reqparse, marshal
+from injector import inject
 from werkzeug.exceptions import BadRequest
 from services.database_service import DatabaseService
 import datetime
+from services.connection_service import ConnectionService
 
 connection_request_parser = reqparse.RequestParser()
+connection_request_parser.add_argument('config_name')
 connection_request_parser.add_argument('db_host')
 connection_request_parser.add_argument('db_port')
 connection_request_parser.add_argument('db_user')
@@ -25,12 +28,19 @@ table_name_fields = {
 
 
 class DatabaseConnectController(Resource):
+    @inject
+    def __init__(self, con: ConnectionService):
+        self.connection_service = con
+
     def post(self):
         global service
         # Close old connection if existing
         if service:
             service.disconnect()
         args = connection_request_parser.parse_args()
+        # If config_name is set, replace given args with saved connection parameters
+        if args['config_name'] is not None:
+            args = self.connection_service.get_connection_details(args['config_name'])
         service = DatabaseService(args['db_host'], args['db_port'], args['db_user'], args['db_pass'], args['db_name'])
         return {"message": "Connection created successfully :)"}, 201
 
