@@ -20,20 +20,14 @@ export class LoginComponent implements OnInit {
   };
 
   constructor(
-    private login: LoginService,
-    private route: ActivatedRoute,
-    private authGuard: AuthGuard,
-    private router: Router) { }
+    private login: LoginService
+  ) {}
 
   ngOnInit(): void {
   }
 
-  submit() {
-    this.login.login(this.formData).subscribe( () => {
-      this.authGuard.isAuthenticated = true;
-      const returnUrl = this.route.snapshot.queryParams['returnUrl'];
-      this.router.navigate([returnUrl]);
-    });
+  submit(): void {
+    this.login.login(this.formData);
   }
 
 }
