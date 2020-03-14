@@ -8,6 +8,6 @@ flask = "==1.0.2"
 flask-restful = "==0.3.7"
 flask-cors = "==3.0.7"
 psycopg2-binary = "==2.8.4"
+flask-injector = "==0.12.3"
 
 [dev-packages]
-
