@@ -4,7 +4,7 @@ postgres client supporting reverse foreign key navigation
 ## API usage
 The prefix for all endpoints is `/api`
 ### Connect
-To connect to the service, call `/connect` with the following form encoded parameters:
+To connect to the service, call `/connect` with either a config_name or the following form encoded parameters:
 - db_host
 - db_port
 - db_user
@@ -21,3 +21,7 @@ Call `/table/<string:table_name>` to get data. The following GET parameters are 
 - `offset` to shift the returned rows for pagination
 - `filter_column` specify the column to filter. May only be used together with
 - `by_value` to specify the value to filter for
+
+### System
+- Call `/system` to get the system state. Either 'up' or nothing :D
+- Call `/system/shutdown` to stop the server

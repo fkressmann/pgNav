@@ -2,6 +2,12 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 import webbrowser
+# from threading import Timer
+# from werkzeug.middleware.profiler import ProfilerMiddleware
+
+from controllers.database_controller import DatabaseTableController, DatabaseConnectController, DatabaseTablesController
+from controllers.system_controller import SystemController, SystemCommandController
+
 from flask_injector import FlaskInjector
 from dependencies import configure
 from injector import inject
@@ -10,6 +16,7 @@ from threading import Timer
 
 from controllers.database_controller import DatabaseTableController, DatabaseConnectController, DatabaseTablesController
 from controllers.connections_controller import ConnectionsController
+
 
 app = Flask(__name__, static_url_path='')
 CORS(app)
@@ -21,6 +28,9 @@ api.add_resource(DatabaseTableController, prefix + '/table/<string:table>')
 api.add_resource(DatabaseConnectController, prefix + '/connect')
 api.add_resource(DatabaseTablesController, prefix + '/tables')
 api.add_resource(ConnectionsController, prefix + '/connections')
+api.add_resource(SystemController, prefix + '/system')
+api.add_resource(SystemCommandController, prefix + '/system/<string:action>')
+
 
 # Enable dependency injection
 FlaskInjector(app=app, modules=[configure])
@@ -36,5 +46,5 @@ def hello_world():
 
 
 if __name__ == "__main__":
-#    Timer(1, open_browser).start()
+    #    Timer(1, open_browser).start()
     app.run()
