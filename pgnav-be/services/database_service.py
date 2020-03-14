@@ -6,7 +6,6 @@ from werkzeug.exceptions import BadRequest, InternalServerError
 from models.table import Table
 from models.column import Column
 from models.refs import Reference
-from functools import reduce
 
 # Parse shit like 'FOREIGN KEY (allocation_id) REFERENCES allocations(id)'
 parser = re.compile("FOREIGN KEY \\(([\\w_]*)\\) REFERENCES ([\\w_]*)\\(([\\w_]*)\\)")
