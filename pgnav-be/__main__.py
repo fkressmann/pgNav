@@ -1,21 +1,17 @@
-from flask import Flask
-from flask_restful import Api
-from flask_cors import CORS
 import webbrowser
-# from threading import Timer
-# from werkzeug.middleware.profiler import ProfilerMiddleware
 
+from flask import Flask
+from flask_cors import CORS
+from flask_injector import FlaskInjector
+from flask_restful import Api
+
+from controllers.connections_controller import ConnectionsController
 from controllers.database_controller import DatabaseTableController, DatabaseConnectController, DatabaseTablesController
 from controllers.system_controller import SystemController, SystemCommandController
-
-from flask_injector import FlaskInjector
 from dependencies import configure
-from injector import inject
-from threading import Timer
-# from werkzeug.middleware.profiler import ProfilerMiddleware
 
-from controllers.database_controller import DatabaseTableController, DatabaseConnectController, DatabaseTablesController
-from controllers.connections_controller import ConnectionsController
+# from threading import Timer
+# from werkzeug.middleware.profiler import ProfilerMiddleware
 
 
 app = Flask(__name__, static_url_path='')
