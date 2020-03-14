@@ -41,6 +41,11 @@ def hello_world():
     return app.send_static_file('index.html')
 
 
+@app.errorhandler(404)
+def page_not_found(error):
+    return app.send_static_file('index.html')
+
+
 if __name__ == "__main__":
     #    Timer(1, open_browser).start()
     app.run()
