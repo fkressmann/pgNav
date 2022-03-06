@@ -1,5 +1,13 @@
 # pgNav
-postgres client supporting reverse foreign key navigation
+postgres client supporting reverse foreign key navigation.
+
+## Why?
+We realized that you sometimes want to navigate backwards in SQL tables. 
+Most tools support to click on a column which references some key of another table to get to the respective entry.
+But sometimes I want to click on a field which I know is referenced by other tables, see which tables reference the row and display their entries.
+This very rudimentary tool supports this navigation on postgres databases.
+
+It's far from done or professional, was written in one night but maybe still helps someone.
 
 ## API usage
 The prefix for all endpoints is `/api`
